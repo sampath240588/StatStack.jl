@@ -1,0 +1,534 @@
+/usr/lib/python2.7/site-packages/widgetsnbextension/__init__.py:30: UserWarning: To use the jupyter-js-widgets nbextension, you'll need to update
+    the Jupyter notebook to version 4.2 or later.
+  the Jupyter notebook to version 4.2 or later.""")
+[W 12:46:09.464 NotebookApp] WARNING: The notebook server is listening on all IP addresses and not using encryption. This is not recommended.
+[W 12:46:09.464 NotebookApp] WARNING: The notebook server is listening on all IP addresses and not using authentication. This is highly insecure and not recommended.
+[I 12:46:09.469 NotebookApp] Serving notebooks from local directory: /home/rmadmin/g/StatStack/src/nb
+[I 12:46:09.469 NotebookApp] 0 active kernels 
+[I 12:46:09.469 NotebookApp] The Jupyter Notebook is running at: http://[all ip addresses on your system]:8888/
+[I 12:46:09.469 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[I 12:46:28.491 NotebookApp] 302 GET / (10.106.224.36) 0.80ms
+[I 12:46:41.531 NotebookApp] Creating new notebook in 
+[W 12:46:42.751 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.224.36) 10.24ms referer=http://10.63.36.7:8888/notebooks/Untitled.ipynb?kernel_name=julia-0.4
+[I 12:46:42.884 NotebookApp] Kernel started: a7809212-970a-42b7-8a71-41aa1b04f5de
+[I 12:47:29.057 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:02:43.035 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:04:42.983 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:04:43.593 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:06:42.992 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:08:42.989 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:12:43.021 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:14:43.915 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:18:43.019 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:20:43.022 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:22:43.033 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:24:43.029 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:26:43.036 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:27:16.703 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:28:43.052 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:30:43.051 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:32:43.053 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:34:43.974 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:36:43.947 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:40:43.247 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:42:43.967 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:44:43.964 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:50:43.283 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:52:43.098 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:54:43.096 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:56:43.112 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:56:45.288 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 13:58:43.108 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:00:43.993 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:02:43.990 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:12:43.319 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:14:43.157 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:16:43.152 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:18:43.145 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:20:43.155 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:22:43.161 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:24:09.832 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:24:43.228 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:24:44.554 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:25:48.727 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:28:43.174 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:30:44.064 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:32:43.190 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:34:43.191 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:36:43.197 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:42:43.428 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:44:43.220 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:46:44.107 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:50:43.265 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:51:31.938 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:52:43.240 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:54:43.254 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:56:43.242 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 14:58:43.248 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:00:43.261 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:02:43.256 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:06:43.272 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:08:43.272 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:10:43.274 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:12:43.288 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:13:26.076 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:17:13.391 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:17:51.131 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:20:43.297 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:21:04.923 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:21:09.113 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:21:24.385 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:22:03.919 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:22:43.295 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:22:49.928 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:24:43.312 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:25:47.212 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:27:58.333 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 15:28:28.873 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 16:31:13.214 NotebookApp] Creating new notebook in 
+[W 16:31:14.511 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.224.36) 2.25ms referer=http://10.63.36.7:8888/notebooks/Untitled.ipynb?kernel_name=julia-0.4
+[I 16:31:14.650 NotebookApp] Kernel started: c747fa70-1ef2-45ef-9211-7398625a9663
+[I 16:33:15.324 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 16:37:50.705 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 16:38:44.347 NotebookApp] Saving file at /Julia-Kaggle0.ipynb
+[I 16:39:14.734 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 16:41:15.345 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 16:43:14.743 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 16:45:14.749 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 16:55:15.454 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 16:57:14.771 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 16:59:14.793 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:01:15.390 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:03:14.791 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:11:14.885 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:13:14.827 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:15:14.804 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:17:15.438 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:23:14.902 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:25:14.839 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:29:14.844 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:31:15.454 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:33:14.848 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:35:14.863 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:37:14.898 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:39:14.858 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:41:14.877 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:43:14.875 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:45:14.880 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:47:14.888 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:47:47.356 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:51:03.632 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:55:14.948 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:57:14.910 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 17:59:14.918 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 18:01:14.907 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 18:03:14.963 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 18:05:14.925 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 18:07:15.555 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 18:25:15.097 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 18:25:19.626 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[I 18:44:01.594 NotebookApp] Saving file at /Overlay_Nerve_Visualization.ipynb
+[W 18:47:40.260 NotebookApp] WebSocket ping timeout after 119934 ms.
+[W 18:47:40.798 NotebookApp] WebSocket ping timeout after 119943 ms.
+[W 22:44:20.657 NotebookApp] WebSocket ping timeout after 119929 ms.
+[W 22:44:24.105 NotebookApp] WebSocket ping timeout after 119481 ms.
+[W 04:21:47.889 NotebookApp] WebSocket ping timeout after 119925 ms.
+[W 04:21:48.307 NotebookApp] WebSocket ping timeout after 119925 ms.
+[W 11:37:13.829 NotebookApp] WebSocket ping timeout after 119924 ms.
+[W 11:37:14.021 NotebookApp] WebSocket ping timeout after 119923 ms.
+[W 13:15:49.433 NotebookApp] 404 GET /notebooks/nb/GLMfits.ipynb (170.118.182.102): No such file or directory: nb/GLMfits.ipynb
+[W 13:15:49.436 NotebookApp] 404 GET /notebooks/nb/GLMfits.ipynb (170.118.182.102) 3.26ms referer=http://10.63.36.7:8888/tree/nb
+[W 01:58:55.698 NotebookApp] 404 GET /notebooks/nb/GLMfits.ipynb (10.106.224.117): No such file or directory: nb/GLMfits.ipynb
+[W 01:58:55.700 NotebookApp] 404 GET /notebooks/nb/GLMfits.ipynb (10.106.224.117) 3.17ms referer=http://10.63.36.7:8888/tree/nb
+[I 01:59:01.885 NotebookApp] 302 GET / (10.106.224.117) 0.58ms
+[I 01:59:16.713 NotebookApp] Creating new notebook in 
+[W 01:59:23.773 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.224.117) 2.29ms referer=http://10.63.36.7:8888/notebooks/Untitled.ipynb?kernel_name=julia-0.4
+[I 01:59:23.945 NotebookApp] Kernel started: f7decb3c-6e33-433a-909d-cb8b3e949c2e
+[I 02:01:23.997 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:03:24.012 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:05:25.597 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:07:25.266 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:09:26.130 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:11:25.005 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:13:24.967 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:19:24.799 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:21:25.141 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:23:24.858 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:25:24.743 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:27:26.036 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:29:25.370 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:31:24.785 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:33:24.386 NotebookApp] Saving file at /R-Conversion.ipynb
+[W 04:49:29.975 NotebookApp] WebSocket ping timeout after 119926 ms.
+[W 17:23:33.719 NotebookApp] WebSocket ping timeout after 119912 ms.
+[I 23:01:47.026 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:03:47.080 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:04:06.291 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:05:47.270 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:07:46.817 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:09:46.888 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:39:47.187 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:43:46.950 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:45:46.920 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:47:47.073 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:49:47.233 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:51:08.663 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:53:50.573 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:55:47.763 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:55:52.484 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:57:47.042 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 23:59:46.872 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:01:46.945 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:03:46.839 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:05:46.883 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:07:49.549 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:09:47.301 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:11:47.227 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:13:46.927 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:17:46.853 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:19:19.563 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:21:47.299 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:23:47.009 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:24:30.291 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:25:46.906 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:37:47.253 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:39:47.505 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:41:20.545 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:44:02.172 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:44:24.297 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:47:46.981 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 00:49:46.903 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 01:19:47.601 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 01:47:47.527 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 01:49:47.395 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:07:48.048 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:29:47.533 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:30:12.958 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:41:47.642 NotebookApp] Saving file at /R-Conversion.ipynb
+[W 03:14:10.997 NotebookApp] WebSocket ping timeout after 119918 ms.
+[I 11:57:58.030 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 12:13:58.042 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 12:14:19.684 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 12:14:20.166 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 12:15:57.684 NotebookApp] Saving file at /R-Conversion.ipynb
+[W 21:11:10.159 NotebookApp] WebSocket ping timeout after 119948 ms.
+[W 04:27:57.734 NotebookApp] WebSocket ping timeout after 119879 ms.
+[W 11:10:13.052 NotebookApp] WebSocket ping timeout after 119923 ms.
+[W 12:41:50.649 NotebookApp] WebSocket ping timeout after 119927 ms.
+[I 00:50:46.484 NotebookApp] 302 GET / (10.106.229.54) 1.22ms
+[W 00:51:39.575 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.229.54) 2.27ms referer=http://10.63.36.7:8888/notebooks/Julia-Kaggle0.ipynb
+[I 01:48:54.891 NotebookApp] Creating new notebook in 
+[W 01:48:56.850 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.229.54) 2.77ms referer=http://10.63.36.7:8888/notebooks/Untitled.ipynb?kernel_name=julia-0.4
+[I 01:48:57.023 NotebookApp] Kernel started: df9b761d-9048-43df-918e-53accef7d407
+[I 01:50:57.108 NotebookApp] Saving file at /K-Santander.ipynb
+[I 01:52:57.103 NotebookApp] Saving file at /K-Santander.ipynb
+[I 01:54:57.604 NotebookApp] Saving file at /K-Santander.ipynb
+[I 01:55:06.104 NotebookApp] Saving file at /K-Santander.ipynb
+[I 01:55:07.392 NotebookApp] Saving file at /K-Santander.ipynb
+[I 01:56:52.024 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 01:57:23.041 NotebookApp] Saving file at /R-Conversion.ipynb
+[W 02:38:48.413 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.229.54) 2.17ms referer=http://10.63.36.7:8888/notebooks/Julia-Kaggle0.ipynb
+[W 02:38:52.838 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.229.54) 1.74ms referer=http://10.63.36.7:8888/notebooks/Overlay_Nerve_Visualization.ipynb
+[I 02:42:22.744 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:46:23.060 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 02:54:24.910 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:06:24.393 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:08:23.513 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:16:23.842 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:26:22.849 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:28:23.595 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:38:22.802 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:39:37.121 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:39:39.337 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:40:22.730 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:42:22.845 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:44:22.658 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:45:03.768 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:45:06.324 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:46:19.417 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:46:51.903 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:47:11.786 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:47:39.346 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:49:24.349 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 03:49:42.563 NotebookApp] Saving file at /R-Conversion.ipynb
+[W 03:51:49.176 NotebookApp] WebSocket ping timeout after 119625 ms.
+[W 03:51:53.275 NotebookApp] WebSocket ping timeout after 119928 ms.
+[W 03:51:56.497 NotebookApp] WebSocket ping timeout after 119922 ms.
+[W 03:52:00.399 NotebookApp] WebSocket ping timeout after 119926 ms.
+[I 16:10:43.335 NotebookApp] 302 GET / (170.118.182.102) 0.99ms
+[W 16:10:52.151 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.182.102) 8.09ms referer=http://10.63.36.7:8888/notebooks/R-Conversion.ipynb
+[W 18:44:07.594 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 18:44:07.670 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.182.102) 1.55ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[I 18:44:09.993 NotebookApp] Kernel started: 11beb9aa-238a-4463-995d-78d1786e4e98
+[I 19:20:10.461 NotebookApp] Saving file at /GLMfits.ipynb
+[W 19:20:10.466 NotebookApp] Saving untrusted notebook GLMfits.ipynb
+[W 21:11:53.602 NotebookApp] WebSocket ping timeout after 119950 ms.
+[W 21:12:13.314 NotebookApp] WebSocket ping timeout after 119950 ms.
+[W 04:12:24.039 NotebookApp] WebSocket ping timeout after 119926 ms.
+[W 13:31:22.001 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.182.102) 3.27ms referer=http://10.63.36.7:8888/notebooks/R-Conversion.ipynb
+[I 13:52:28.108 NotebookApp] Saving file at /GLMfits.ipynb
+[W 13:52:28.115 NotebookApp] Saving untrusted notebook GLMfits.ipynb
+[W 20:15:08.923 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.182.102) 4.05ms referer=http://10.63.36.7:8888/notebooks/R-Conversion.ipynb
+[W 21:27:25.810 NotebookApp] WebSocket ping timeout after 119947 ms.
+[I 13:05:13.522 NotebookApp] 302 GET / (170.118.184.121) 0.83ms
+[W 13:05:22.856 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 4.01ms referer=http://10.63.36.7:8888/notebooks/R-Conversion.ipynb
+[W 14:29:43.782 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 2.09ms referer=http://10.63.36.7:8888/notebooks/R-Conversion.ipynb
+[W 21:16:45.527 NotebookApp] WebSocket ping timeout after 119923 ms.
+[W 13:25:09.081 NotebookApp] WebSocket ping timeout after 119632 ms.
+[W 21:17:11.293 NotebookApp] WebSocket ping timeout after 119947 ms.
+[I 13:37:51.246 NotebookApp] 302 GET / (170.118.184.121) 0.59ms
+[I 13:38:04.784 NotebookApp] Creating new notebook in 
+[W 13:38:06.179 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 3.76ms referer=http://10.63.36.7:8888/notebooks/Untitled.ipynb?kernel_name=julia-0.4
+[I 13:38:06.334 NotebookApp] Kernel started: bccbfd1e-240a-47a9-a04d-25f529dd32f9
+[W 13:38:16.447 NotebookApp] Timeout waiting for kernel_info reply from bccbfd1e-240a-47a9-a04d-25f529dd32f9
+[I 13:38:28.909 NotebookApp] Saving file at /Julia_Syntax.ipynb
+[I 13:38:45.866 NotebookApp] Saving file at /Julia_Syntax.ipynb
+[W 20:26:46.448 NotebookApp] WebSocket ping timeout after 119946 ms.
+[W 20:25:40.680 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 20:25:40.755 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 1.56ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[W 20:53:43.454 NotebookApp] WebSocket ping timeout after 119949 ms.
+[W 21:11:02.705 NotebookApp] WebSocket ping timeout after 119949 ms.
+[W 16:21:16.096 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 16:21:22.486 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 1.92ms referer=http://10.63.36.7:8888/notebooks/R-Conversion.ipynb
+[W 16:21:22.488 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 1.53ms referer=http://10.63.36.7:8888/notebooks/Julia_Syntax.ipynb
+[W 16:21:23.699 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 1.99ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[W 21:18:52.307 NotebookApp] WebSocket ping timeout after 119950 ms.
+[W 21:18:53.435 NotebookApp] WebSocket ping timeout after 119949 ms.
+[W 21:18:54.997 NotebookApp] WebSocket ping timeout after 119948 ms.
+[W 13:51:45.866 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 1.71ms referer=http://10.63.36.7:8888/notebooks/R-Conversion.ipynb
+[W 14:00:37.901 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 14:00:37.983 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 1.97ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[W 18:54:40.754 NotebookApp] WebSocket ping timeout after 119949 ms.
+[W 18:54:46.764 NotebookApp] WebSocket ping timeout after 119949 ms.
+[W 18:55:05.563 NotebookApp] WebSocket ping timeout after 119939 ms.
+[W 20:20:21.761 NotebookApp] WebSocket ping timeout after 119947 ms.
+[W 20:20:27.305 NotebookApp] WebSocket ping timeout after 119945 ms.
+[W 20:20:33.366 NotebookApp] WebSocket ping timeout after 119945 ms.
+[I 20:53:59.921 NotebookApp] Saving file at /Julia_Syntax.ipynb
+[W 21:26:24.402 NotebookApp] WebSocket ping timeout after 119949 ms.
+[W 21:26:29.430 NotebookApp] WebSocket ping timeout after 119949 ms.
+[W 21:26:35.429 NotebookApp] WebSocket ping timeout after 119949 ms.
+[I 13:33:44.294 NotebookApp] Saving file at /Julia_Syntax.ipynb
+[W 17:31:11.075 NotebookApp] WebSocket ping timeout after 119935 ms.
+[W 15:44:13.570 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 10.92ms referer=http://10.63.36.7:8888/notebooks/Julia_Syntax.ipynb
+[W 15:45:12.940 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 15:45:18.131 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 1.95ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[W 15:45:20.842 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 2.80ms referer=http://10.63.36.7:8888/notebooks/R-Conversion.ipynb
+[W 20:42:48.190 NotebookApp] WebSocket ping timeout after 119949 ms.
+[W 20:42:53.820 NotebookApp] WebSocket ping timeout after 119948 ms.
+[W 20:43:13.954 NotebookApp] WebSocket ping timeout after 119943 ms.
+[W 15:29:34.182 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 15:29:34.264 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 7.90ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[W 15:29:37.886 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 1.48ms referer=http://10.63.36.7:8888/notebooks/R-Conversion.ipynb
+[W 21:43:06.813 NotebookApp] WebSocket ping timeout after 119947 ms.
+[W 21:43:07.312 NotebookApp] WebSocket ping timeout after 119949 ms.
+[W 21:43:08.803 NotebookApp] WebSocket ping timeout after 119948 ms.
+[W 14:11:05.706 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 5.12ms referer=http://10.63.36.7:8888/notebooks/Julia_Syntax.ipynb
+[I 17:40:05.329 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 17:42:05.063 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 17:44:05.032 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 17:46:05.029 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 17:48:05.023 NotebookApp] Saving file at /R-Conversion.ipynb
+[W 17:49:06.464 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[I 17:50:06.315 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 17:52:06.140 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 17:54:05.032 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 17:54:10.729 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 17:56:05.032 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 17:58:05.026 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 18:00:05.029 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 18:24:06.453 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 18:26:05.110 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 18:28:05.055 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 18:30:05.072 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 19:24:05.560 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 19:58:05.607 NotebookApp] Saving file at /R-Conversion.ipynb
+[W 20:39:10.702 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 20:39:10.766 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 1.42ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[W 21:18:05.961 NotebookApp] WebSocket ping timeout after 119950 ms.
+[W 21:18:13.134 NotebookApp] WebSocket ping timeout after 119950 ms.
+[W 12:14:30.910 NotebookApp] WebSocket ping timeout after 119927 ms.
+[W 12:14:31.084 NotebookApp] WebSocket ping timeout after 119909 ms.
+[W 13:37:12.602 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 13:37:12.659 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 1.48ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[I 13:39:16.295 NotebookApp] Saving file at /GLMfits.ipynb
+[W 13:39:16.298 NotebookApp] Saving untrusted notebook GLMfits.ipynb
+[I 13:50:22.973 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 13:54:22.611 NotebookApp] Saving file at /R-Conversion.ipynb
+Starting kernel event loops.
+[I 14:10:58.498 NotebookApp] Kernel shutdown: 11beb9aa-238a-4463-995d-78d1786e4e98
+[I 14:22:22.874 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 14:24:22.674 NotebookApp] Saving file at /R-Conversion.ipynb
+[W 14:28:58.804 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 14:28:58.877 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 1.50ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[I 14:29:00.830 NotebookApp] Kernel started: 50a2f5e3-9169-4526-960e-6a5fcc195483
+Starting kernel event loops.
+[I 14:29:16.533 NotebookApp] Kernel shutdown: 50a2f5e3-9169-4526-960e-6a5fcc195483
+[W 14:29:42.297 NotebookApp] 404 GET /notebooks/GLMfits.ipynb (170.118.184.121): No such file or directory: GLMfits.ipynb
+[W 14:29:42.298 NotebookApp] 404 GET /notebooks/GLMfits.ipynb (170.118.184.121) 1.91ms referer=None
+INFO: Recompiling stale cache file /home/rmadmin/.julia/lib/v0.4/JSON.ji for module JSON.
+Starting kernel event loops.
+[I 14:30:43.567 NotebookApp] Kernel shutdown: c747fa70-1ef2-45ef-9211-7398625a9663
+Starting kernel event loops.
+[I 14:30:48.396 NotebookApp] Kernel shutdown: df9b761d-9048-43df-918e-53accef7d407
+[W 14:33:37.616 NotebookApp] 404 GET /notebooks/GLMfits.ipynb (170.118.184.121): No such file or directory: GLMfits.ipynb
+[W 14:33:37.618 NotebookApp] 404 GET /notebooks/GLMfits.ipynb (170.118.184.121) 3.31ms referer=None
+[I 14:41:27.395 NotebookApp] Saving file at /R-Conversion.ipynb
+[I 14:43:14.742 NotebookApp] Saving file at /GLMfits.ipynb
+[W 14:43:14.744 NotebookApp] Saving untrusted notebook GLMfits.ipynb
+[W 18:05:15.347 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 18:05:15.407 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 1.36ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[I 18:05:17.196 NotebookApp] Kernel started: dce7fe59-df0a-4c38-b1b6-c64e1b364748
+[W 18:08:52.774 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 18:08:52.834 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.227.198) 1.26ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+Starting kernel event loops.
+[I 19:16:19.278 NotebookApp] Kernel shutdown: dce7fe59-df0a-4c38-b1b6-c64e1b364748
+[W 21:07:44.513 NotebookApp] WebSocket ping timeout after 119947 ms.
+[W 21:07:50.503 NotebookApp] WebSocket ping timeout after 119942 ms.
+[W 01:16:16.837 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101): Kernel does not exist: dce7fe59-df0a-4c38-b1b6-c64e1b364748
+[W 01:16:16.839 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101) 12.86ms referer=None
+[W 01:16:19.076 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101): Kernel does not exist: dce7fe59-df0a-4c38-b1b6-c64e1b364748
+[W 01:16:19.077 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101) 5.40ms referer=None
+[W 01:16:23.253 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101): Kernel does not exist: dce7fe59-df0a-4c38-b1b6-c64e1b364748
+[W 01:16:23.256 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101) 6.09ms referer=None
+[W 01:16:31.435 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101): Kernel does not exist: dce7fe59-df0a-4c38-b1b6-c64e1b364748
+[W 01:16:31.436 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101) 5.49ms referer=None
+[W 01:16:47.625 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101): Kernel does not exist: dce7fe59-df0a-4c38-b1b6-c64e1b364748
+[W 01:16:47.626 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101) 5.58ms referer=None
+[W 01:17:19.837 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101): Kernel does not exist: dce7fe59-df0a-4c38-b1b6-c64e1b364748
+[W 01:17:19.839 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101) 8.66ms referer=None
+[W 01:18:24.019 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101): Kernel does not exist: dce7fe59-df0a-4c38-b1b6-c64e1b364748
+[W 01:18:24.020 NotebookApp] 404 GET /api/kernels/dce7fe59-df0a-4c38-b1b6-c64e1b364748/channels?session_id=3E0F8725E74D4260878C748029CF297D (10.106.228.101) 6.68ms referer=None
+[W 03:43:17.513 NotebookApp] WebSocket ping timeout after 119850 ms.
+[W 18:10:55.040 NotebookApp] WebSocket ping timeout after 119930 ms.
+[W 14:29:11.635 NotebookApp] 404 GET /notebooks/GLMfits.ipynb (170.118.184.59): No such file or directory: GLMfits.ipynb
+[W 14:29:11.637 NotebookApp] 404 GET /notebooks/GLMfits.ipynb (170.118.184.59) 4.23ms referer=None
+[I 14:45:03.975 NotebookApp] Creating new notebook in 
+[W 14:45:05.383 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.121) 9.67ms referer=http://10.63.36.7:8888/notebooks/Untitled.ipynb?kernel_name=julia-0.4
+[I 14:45:05.573 NotebookApp] Kernel started: 61e1cba7-80e3-429d-86a6-cdb9ea510195
+[I 14:47:05.750 NotebookApp] Saving file at /R-Conv2.ipynb
+[I 14:49:05.652 NotebookApp] Saving file at /R-Conv2.ipynb
+[W 19:25:38.752 NotebookApp] WebSocket ping timeout after 119949 ms.
+[W 22:14:00.567 NotebookApp] WebSocket ping timeout after 119563 ms.
+[W 02:16:03.049 NotebookApp] WebSocket ping timeout after 119917 ms.
+[I 18:59:30.773 NotebookApp] Saving file at /Julia_Syntax.ipynb
+[I 19:03:30.701 NotebookApp] Saving file at /Julia_Syntax.ipynb
+[I 08:56:07.673 NotebookApp] 302 GET / (10.65.28.113) 0.62ms
+[I 08:56:19.808 NotebookApp] Creating new notebook in 
+[W 08:56:25.119 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.65.28.113) 4.85ms referer=http://10.63.36.7:8888/notebooks/Untitled.ipynb?kernel_name=julia-0.4
+[I 08:56:25.397 NotebookApp] Kernel started: cb24b0ff-abd1-4755-910e-7595863d8c23
+[I 08:58:25.590 NotebookApp] Saving file at /Victor test.ipynb
+[I 09:00:25.929 NotebookApp] Saving file at /Victor test.ipynb
+[W 16:19:59.225 NotebookApp] WebSocket ping timeout after 119823 ms.
+[I 08:32:32.128 NotebookApp] Saving file at /Victor test.ipynb
+[W 08:33:17.521 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.65.28.113) 1.69ms referer=http://10.63.36.7:8888/notebooks/Victor%20test.ipynb
+[I 08:35:18.008 NotebookApp] Saving file at /Victor test.ipynb
+[I 09:33:18.395 NotebookApp] Saving file at /Victor test.ipynb
+[I 14:32:26.573 NotebookApp] KernelRestarter: restarting kernel (1/5)
+[I 14:32:26.944 NotebookApp] KernelRestarter: restarting kernel (1/5)
+[I 14:32:27.334 NotebookApp] KernelRestarter: restarting kernel (1/5)
+[I 14:32:27.883 NotebookApp] KernelRestarter: restarting kernel (1/5)
+[I 14:32:28.396 NotebookApp] KernelRestarter: restarting kernel (1/5)
+WARNING:root:kernel cb24b0ff-abd1-4755-910e-7595863d8c23 restarted
+[W 16:35:18.167 NotebookApp] WebSocket ping timeout after 119817 ms.
+[W 23:25:48.617 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.226.240) 1.64ms referer=http://10.63.36.7:8888/notebooks/R-Conv2.ipynb
+[W 23:25:48.892 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.226.240) 1.81ms referer=http://10.63.36.7:8888/notebooks/Julia_Syntax.ipynb
+[W 23:25:51.414 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.226.240) 1.44ms referer=http://10.63.36.7:8888/notebooks/R-Conversion.ipynb
+[W 23:25:52.400 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 23:25:52.465 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.226.240) 1.44ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[I 23:25:56.053 NotebookApp] Kernel started: 623d1a2b-fb58-4091-95d0-19983a4bfab2
+[W 07:11:29.199 NotebookApp] WebSocket ping timeout after 119846 ms.
+[W 07:11:49.454 NotebookApp] WebSocket ping timeout after 119857 ms.
+[W 07:11:50.061 NotebookApp] WebSocket ping timeout after 119857 ms.
+[W 07:11:55.531 NotebookApp] WebSocket ping timeout after 119856 ms.
+[W 14:11:43.812 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 14:11:43.885 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.50) 1.56ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[W 21:24:46.075 NotebookApp] WebSocket ping timeout after 119947 ms.
+[W 23:14:18.003 NotebookApp] WebSocket ping timeout after 119899 ms.
+[W 01:26:52.266 NotebookApp] WebSocket ping timeout after 119927 ms.
+[W 06:21:55.326 NotebookApp] WebSocket ping timeout after 119929 ms.
+[W 18:24:25.119 NotebookApp] WebSocket ping timeout after 119949 ms.
+[W 19:34:49.321 NotebookApp] WebSocket ping timeout after 119899 ms.
+[W 22:17:06.127 NotebookApp] WebSocket ping timeout after 119919 ms.
+[W 15:19:36.075 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 15:19:36.139 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.50) 1.85ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[I 18:08:40.707 NotebookApp] Saving file at /Victor test.ipynb
+[I 18:10:40.434 NotebookApp] Saving file at /Victor test.ipynb
+[W 22:19:32.441 NotebookApp] WebSocket ping timeout after 119949 ms.
+[W 02:46:40.953 NotebookApp] WebSocket ping timeout after 119725 ms.
+[W 03:02:15.966 NotebookApp] WebSocket ping timeout after 119721 ms.
+[W 14:02:31.547 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.50) 1.53ms referer=http://10.63.36.7:8888/notebooks/R-Conv2.ipynb
+[I 14:02:40.846 NotebookApp] Saving file at /Julia_Syntax.ipynb
+[W 15:07:31.381 NotebookApp] WebSocket ping timeout after 119950 ms.
+[W 15:07:32.183 NotebookApp] WebSocket ping timeout after 119951 ms.
+[W 15:07:32.681 NotebookApp] WebSocket ping timeout after 119951 ms.
+[W 15:13:23.839 NotebookApp] WebSocket ping timeout after 119723 ms.
+[W 16:54:18.601 NotebookApp] WebSocket ping timeout after 119936 ms.
+[W 16:54:18.726 NotebookApp] WebSocket ping timeout after 119925 ms.
+[W 16:54:18.948 NotebookApp] WebSocket ping timeout after 119946 ms.
+[W 21:16:35.063 NotebookApp] WebSocket ping timeout after 119950 ms.
+[W 21:16:35.850 NotebookApp] WebSocket ping timeout after 119950 ms.
+[W 21:16:35.984 NotebookApp] WebSocket ping timeout after 119950 ms.
+[W 22:59:32.140 NotebookApp] WebSocket ping timeout after 119724 ms.
+[W 01:17:57.174 NotebookApp] WebSocket ping timeout after 119877 ms.
+[I 17:28:11.443 NotebookApp] 302 GET / (170.118.184.95) 0.63ms
+[W 17:28:48.669 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 17:28:48.732 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.95) 4.68ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+Starting kernel event loops.
+[I 17:29:32.505 NotebookApp] Kernel shutdown: 623d1a2b-fb58-4091-95d0-19983a4bfab2
+[I 13:13:51.549 NotebookApp] 302 GET / (170.118.184.50) 0.52ms
+[W 13:14:53.041 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.50) 3.81ms referer=http://10.63.36.7:8888/notebooks/Julia-Kaggle0.ipynb
+INFO: Precompiling module ZMQ...
+INFO: Precompiling module Nettle...
+Starting kernel event loops.
+[I 13:15:04.827 NotebookApp] Kernel shutdown: a7809212-970a-42b7-8a71-41aa1b04f5de
+[I 03:54:58.631 NotebookApp] 302 GET / (10.106.225.143) 1.10ms
+[I 03:55:46.193 NotebookApp] Creating new notebook in 
+[W 03:55:55.559 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.225.143) 1.45ms referer=http://10.63.36.7:8888/notebooks/Untitled.ipynb?kernel_name=julia-0.4
+[I 03:55:55.714 NotebookApp] Kernel started: 94e2f98d-66f6-4d05-969c-23359cafa7a7
+[I 03:57:55.808 NotebookApp] Saving file at /Untitled.ipynb
+[I 04:01:23.840 NotebookApp] 302 GET / (10.106.225.143) 0.60ms
+[W 04:01:29.825 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 04:01:29.906 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.225.143) 1.70ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[I 04:01:32.237 NotebookApp] Kernel started: 092137b1-044c-4e74-8ec4-6fc01793d624
+[I 04:03:33.060 NotebookApp] Saving file at /GLMfits.ipynb
+[W 04:03:33.066 NotebookApp] Saving untrusted notebook GLMfits.ipynb
+[W 04:19:18.823 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 04:19:18.932 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (10.106.225.143) 6.36ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[W 04:32:31.167 NotebookApp] WebSocket ping timeout after 119927 ms.
+[W 04:32:52.483 NotebookApp] WebSocket ping timeout after 119927 ms.
+[W 12:13:59.695 NotebookApp] WebSocket ping timeout after 119583 ms.
+[W 12:13:59.876 NotebookApp] WebSocket ping timeout after 119771 ms.
+[W 14:06:39.121 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 14:06:39.187 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.50) 1.49ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[W 21:58:09.227 NotebookApp] WebSocket ping timeout after 119927 ms.
+[W 17:03:11.980 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 17:03:12.058 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.50) 1.72ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[W 21:21:44.247 NotebookApp] WebSocket ping timeout after 119925 ms.
+[W 04:55:47.458 NotebookApp] WebSocket ping timeout after 119921 ms.
+[W 20:18:32.271 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 20:18:32.446 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.50) 4.96ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[W 20:18:49.690 NotebookApp] Notebook GLMfits.ipynb is not trusted
+[W 20:18:55.908 NotebookApp] 404 GET /nbextensions/widgets/notebook/js/extension.js?v=20160530124609 (170.118.184.50) 1.50ms referer=http://10.63.36.7:8888/notebooks/GLMfits.ipynb
+[W 21:22:37.275 NotebookApp] WebSocket ping timeout after 119950 ms.
+[W 21:22:56.669 NotebookApp] WebSocket ping timeout after 119934 ms.
+Starting kernel event loops.
+[I 17:52:45.737 NotebookApp] Kernel shutdown: 092137b1-044c-4e74-8ec4-6fc01793d624
+INFO: Recompiling stale cache file /home/rmadmin/.julia/lib/v0.4/ZMQ.ji for module ZMQ.
+INFO: Precompiling module Nettle...
+Starting kernel event loops.
+[I 17:52:46.040 NotebookApp] Kernel shutdown: 61e1cba7-80e3-429d-86a6-cdb9ea510195
+INFO: Precompiling module ZMQ...
+INFO: Precompiling module Nettle...
+Starting kernel event loops.
+[I 17:52:46.343 NotebookApp] Kernel shutdown: bccbfd1e-240a-47a9-a04d-25f529dd32f9
+INFO: Precompiling module ZMQ...
+INFO: Recompiling stale cache file /home/rmadmin/.julia/lib/v0.4/Nettle.ji for module Nettle.
+Starting kernel event loops.
+[I 17:52:46.646 NotebookApp] Kernel shutdown: f7decb3c-6e33-433a-909d-cb8b3e949c2e
+Starting kernel event loops.
+[I 17:52:46.949 NotebookApp] Kernel shutdown: 94e2f98d-66f6-4d05-969c-23359cafa7a7
+INFO: Precompiling module ZMQ...
+INFO: Precompiling module Nettle...
+Starting kernel event loops.
+[I 17:52:47.251 NotebookApp] Kernel shutdown: cb24b0ff-abd1-4755-910e-7595863d8c23

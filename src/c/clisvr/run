@@ -1,0 +1,2 @@
+gcc -o svr.exe svr.c
+gcc -o cli.exe cli.c

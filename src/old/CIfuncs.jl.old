@@ -1,0 +1,279 @@
+
+ZDict = Dict("onetail_80_pct_intrvl" => 0.84 ,"onetail_90_pct_intrvl" => 1.28, "twotail_80_pct_intrvl" => 1.28, "twotail_90_pct_intrvl" => 1.65)
+
+function calcCI(row::DataFrameRow, zscore::Float64)
+    B=row[:B]; 
+    SE=row[:SE]; 
+    #mean_score0=row[:mean_score0];
+    mean_score0=row[:unadj_mean_score0];
+    #mean_score1=row[:mean_score1]; 
+    mean_score1=row[:unadj_mean_score1];
+    Mt=row[:Mt]; 
+    Mc=row[:Mc]; 
+    M=row[:M]  
+
+    Lb_pre = (   (mean_score1*(Mt/M))    -   (mean_score1*exp(-(B-(SE*zscore)))*(Mt/M))   )  +
+             (   (mean_score0*exp((B-(SE*zscore)))*(Mc/M))    -   (mean_score0*(Mc/M))    )
+    Lb = Lb_pre/mean_score0
+    Ub_pre =  (     ( mean_score1*(Mt/M) )   -   ( mean_score1*exp(-(B+(SE*zscore)))*(Mt/M))   )  +
+              (     ( mean_score0*exp((B+(SE*zscore)))*(Mc/M))  - (mean_score0*(Mc/M) )   )
+    Ub = Ub_pre/mean_score0
+    return Lb, Ub       
+end
+
+###### END FIXED ONLY ####
+
+
+v_ttl=2
+
+function calcPValue_Opt(iDict::OrderedDict)
+    dout = iDict 
+    M = get(iDict, :M, NA)
+    Mt = get(iDict, :Mt, NA)
+    Mc = get(iDict, :Mc, NA)
+    N = get(iDict, :N, NA)
+    Nt = get(iDict, :Mt, NA)
+    Nc = get(iDict, :Nc, NA)
+    B1 = get(iDict, :B1, NA)
+    B2 = get(iDict, :B2, NA)
+    B3 = get(iDict, :B3, NA)
+    SE1 = get(iDict, :SE1, NA)
+    SE2 = get(iDict, :SE2, NA)
+    SE3 = get(iDict, :SE3, NA)
+    SEsq=sqrt(SE1^2+SE2^2+SE3^2)
+    o_mean_score0 = get(iDict, :o_mean_score0, NA)
+    o_mean_score1 = get(iDict, :o_mean_score1, NA)
+    y_mean_score0 = get(iDict, :y_mean_score0, NA)
+    y_mean_score1 = get(iDict, :y_mean_score1, NA)
+    p_mean_score0 = get(iDict, :p_mean_score0, NA)
+    p_mean_score1 =get(iDict, :p_mean_score1, NA)
+    Bsum=B1+B2+B3
+    dout[:Bsum] = Bsum  
+    ###### PVALUE - ONE & TWO ########
+    m=nothing
+    m = Model(solver=NLoptSolver(algorithm=:LD_MMA, maxtime=v_ttl))
+    @variable(m, Bocc <= B1)
+    @variable(m, Bdolocc <= B2)
+    @variable(m, Bpen <= B3)
+    @objective(m, Max, (((Bocc+Bpen+Bdolocc)-Bsum)/SEsq ))
+    @NLconstraint(m, 0.00000 <= ((((p_mean_score1*(Nt/N))+(p_mean_score0*exp(Bpen)*(Nc/N)))
+	                           * ((o_mean_score1*(Mt/M))+(o_mean_score0*exp(Bocc)*(Mc/M)))
+	                           * ((y_mean_score1*(Mt/M))+(y_mean_score0*exp(Bdolocc)*(Mc/M)))
+	                             )
+	                           -(((p_mean_score1*(Nt/N)*exp(-Bpen))+(p_mean_score0*(Nc/N)))
+	                           *((o_mean_score1*(Mt/M)*exp(-Bocc))+(o_mean_score0*(Mc/M)))
+	                           *((y_mean_score1*(Mt/M)*exp(-Bdolocc))+(y_mean_score0*(Mc/M)))
+	                             )
+	                          ) 
+	               <= 0.00001
+                    )
+    #print(m)
+    status = solve(m)
+    zvalue=getobjectivevalue(m)
+    pvalue=2.0 * ccdf(Normal(), abs(zvalue))
+    two_tail = 1-pvalue     
+    one_tail = 1-(pvalue/2)
+    dout[:onetail_pval] = one_tail
+    dout[:twotail_pval] = two_tail
+    println("z-value: ", string(zvalue)," --> p-value: ",string(two_tail))
+    return dout           
+end
+
+
+function calcCI_LB_Opt(iDict::OrderedDict, zscore::Float64, iAccuracy::Float64=0.000000001)
+    M = get(iDict, :M, NA)
+    Mt = get(iDict, :Mt, NA)
+    Mc = get(iDict, :Mc, NA)
+    N = get(iDict, :N, NA)
+    Nt = get(iDict, :Mt, NA)
+    Nc = get(iDict, :Nc, NA)
+    B1 = get(iDict, :B1, NA)
+    B2 = get(iDict, :B2, NA)
+    B3 = get(iDict, :B3, NA)
+    SE1 = get(iDict, :SE1, NA)
+    SE2 = get(iDict, :SE2, NA)
+    SE3 = get(iDict, :SE3, NA)
+    SEsq=sqrt(SE1^2+SE2^2+SE3^2)
+    o_mean_score0 = get(iDict, :o_mean_score0, NA)
+    o_mean_score1 = get(iDict, :o_mean_score1, NA)
+    y_mean_score0 = get(iDict, :y_mean_score0, NA)
+    y_mean_score1 = get(iDict, :y_mean_score1, NA)
+    p_mean_score0 = get(iDict, :p_mean_score0, NA)
+    p_mean_score1 =get(iDict, :p_mean_score1, NA)
+    Bsum=B1+B2+B3
+    ztot = Bsum-(zscore*SEsq)
+    ######CONFIDENCE INTERVAL - LB ########        
+    m=nothing
+    m = Model(solver=NLoptSolver(algorithm=:LD_MMA, maxtime=v_ttl))
+    @variable(m, Bocc <= B1)
+    @variable(m, Bdolocc <= B2)
+    @variable(m, Bpen <= B3)
+    @NLobjective(m, Min, ((((p_mean_score1*(Nt/N))+(p_mean_score0*exp(Bpen)*(Nc/N)))* 
+                                  ((o_mean_score1*(Mt/M))+(o_mean_score0*exp(Bocc)*(Mc/M)))*
+                                  ((y_mean_score1*(Mt/M))+(y_mean_score0*exp(Bdolocc)*(Mc/M)))
+                                  )
+                                  -(((p_mean_score1*(Nt/N)*exp(-Bpen))+(p_mean_score0*(Nc/N)))*
+                                    ((o_mean_score1*(Mt/M)*exp(-Bocc))+(o_mean_score0*(Mc/M)))*
+                                    ((y_mean_score1*(Mt/M)*exp(-Bdolocc))+(y_mean_score0*(Mc/M)))
+                                    )
+                                  )
+                               )
+    @constraint(m, (0.000000000<= (((Bocc+Bpen+Bdolocc)-ztot))<= iAccuracy)) 
+    status = solve(m)
+    mval=getobjectivevalue(m)
+    mval_out=mval/(o_mean_score0*y_mean_score0*p_mean_score0)
+    return mval_out   
+end
+
+
+function calcCI_UB_Opt(iDict::OrderedDict, zscore::Float64, iAccuracy::Float64=0.000000001)
+    M = get(iDict, :M, NA)
+    Mt = get(iDict, :Mt, NA)
+    Mc = get(iDict, :Mc, NA)
+    N = get(iDict, :N, NA)
+    Nt = get(iDict, :Mt, NA)
+    Nc = get(iDict, :Nc, NA)
+    B1 = get(iDict, :B1, NA)
+    B2 = get(iDict, :B2, NA)
+    B3 = get(iDict, :B3, NA)
+    SE1 = get(iDict, :SE1, NA)
+    SE2 = get(iDict, :SE2, NA)
+    SE3 = get(iDict, :SE3, NA)
+    SEsq=sqrt(SE1^2+SE2^2+SE3^2)
+    o_mean_score0 = get(iDict, :o_mean_score0, NA)
+    o_mean_score1 = get(iDict, :o_mean_score1, NA)
+    y_mean_score0 = get(iDict, :y_mean_score0, NA)
+    y_mean_score1 = get(iDict, :y_mean_score1, NA)
+    p_mean_score0 = get(iDict, :p_mean_score0, NA)
+    p_mean_score1 =get(iDict, :p_mean_score1, NA)
+    Bsum=B1+B2+B3
+    ######CONFIDENCE INTERVAL - UB ########
+    ztot = Bsum+(zscore*SEsq)
+    m=nothing
+    m = Model(solver=NLoptSolver(algorithm=:LD_MMA, maxtime=v_ttl))
+    @variable(m, Bocc >= B1)
+    @variable(m, Bdolocc >= B2)
+    @variable(m, Bpen >= B3)
+    @NLobjective(m, Max, ( (((p_mean_score1*(Nt/N))+(p_mean_score0*exp(Bpen)*(Nc/N)))
+                                 * ((o_mean_score1*(Mt/M))+(o_mean_score0*exp(Bocc)*(Mc/M)))
+                                 * ((y_mean_score1*(Mt/M))+(y_mean_score0*exp(Bdolocc)*(Mc/M)))
+                                  )
+                                 -(((p_mean_score1*(Nt/N)*exp(-Bpen))+(p_mean_score0*(Nc/N)))
+                                  *((o_mean_score1*(Mt/M)*exp(-Bocc))+(o_mean_score0*(Mc/M)))
+                                  *((y_mean_score1*(Mt/M)*exp(-Bdolocc))+(y_mean_score0*(Mc/M)))
+                                  )
+                               )
+                       )
+    @constraint(m, (0.0000<= (((Bocc+Bpen+Bdolocc)-ztot))<= iAccuracy)) 
+    status = solve(m)
+    mval=getobjectivevalue(m)
+    mval_out=mval/(o_mean_score0*y_mean_score0*p_mean_score0)
+    return mval_out    
+end
+
+
+
+function calcCI_Opt(iDict::OrderedDict)
+    AccArr= [ "0.000000001",
+              "0.00000001",
+              "0.0000001",
+              "0.000001",
+              "0.00001",
+              "0.0001",
+              "0.001",
+              "0.01"
+            ]
+    for (zscore_key,zscore) in  ZDict          
+        pref="LB "*zscore_key[1:10]*" ("*iDict[:metakey]"):= "
+        preflen=length(pref)
+        dkey=symbol(zscore_key*"_lb")
+        for iAcc in AccArr
+           print(pref," - "*iAcc*", ")       ;pref=lpad("", preflen, " ")
+           iDict[dkey] = calcCI_LB_Opt(iDict, zscore, float(iAcc))
+           if (iDict[dkey] != -Inf) & (iDict[dkey] != Inf)
+               println("            : Confidence Interval : ", string(iDict[dkey]) )
+               break
+           end
+        end
+        if (iDict[dkey] == -Inf) | (iDict[dkey] == Inf) 
+             println( "!!!!!!!!!!!!!!!!!!FAILED!!!!!!!!!!!!!!!!!!!!!!!!   LB ",zscore_key[1:10]," := ",iDict[:metakey]," == !!!!!!!!!!!!!!!!!!FAILED!!!!!!!!!!!!!!!!!!" ) 
+        end
+       
+        pref="UB "*zscore_key[1:10]*" ("*iDict[:metakey]"):= "   
+        dkey=symbol(zscore_key*"_ub")
+        for iAcc in AccArr
+           print(pref," - "*iAcc*", ")       ;pref=lpad("", preflen, " ")
+           iDict[dkey] = calcCI_UB_Opt(iDict, zscore, float(iAcc))
+           if (iDict[dkey] != -Inf) & (iDict[dkey] != Inf)
+               println("            : Confidence Interval : ", string(iDict[dkey]) )
+               break
+           end
+        end   
+        if (iDict[dkey] == -Inf) | (iDict[dkey] == Inf) 
+            println( "!!!!!!!!!!!!!!!!!!FAILED!!!!!!!!!!!!!!!!!!   UB ",zscore_key[1:10]," := ",iDict[:metakey]," == !!!!!!!!!!!!!!!!!!FAILED!!!!!!!!!!!!!!!!!!" ) 
+        end
+    end
+    return iDict
+end
+
+
+
+function calcCI(md::OrderedDict, zscore::Float64, citype::AbstractString)
+    if citype=="o"
+        B=md[:B1]; SE=md[:SE1]; mean_score0=md[:o_mean_score0]; mean_score1=md[:o_mean_score1]; Mt=md[:Mt]; Mc=md[:Mc]; M=md[:M]
+    elseif citype=="y"
+        B=md[:B2]; SE=md[:SE2]; mean_score0=md[:y_mean_score0]; mean_score1=md[:y_mean_score1]; Mt=md[:Mt]; Mc=md[:Mc]; M=md[:M]; 
+    elseif citype=="p"
+        B=md[:B3]; SE=md[:SE3]; mean_score0=md[:p_mean_score0]; mean_score1=md[:p_mean_score1]; Mt=md[:Nt]; Mc=md[:Nc]; M=md[:N]    
+    end       
+
+    ## ------------ Lower Bound ---------------
+    Lb_pre = (   (mean_score1*(Mt/M))    -   (mean_score1*exp(-(B-(SE*zscore)))*(Mt/M))   )  +
+             (   (mean_score0*exp((B-(SE*zscore)))*(Mc/M))    -   (mean_score0*(Mc/M))    )
+    Lb = Lb_pre/mean_score0
+    ## ------------ Upper Bound ---------------
+    Ub_pre =  (     ( mean_score1*(Mt/M) )   -   ( mean_score1*exp(-(B+(SE*zscore)))*(Mt/M))   )  +
+              (     ( mean_score0*exp((B+(SE*zscore)))*(Mc/M))  - (mean_score0*(Mc/M) )   )
+    Ub = Ub_pre/mean_score0
+    
+    
+    #Ub_pre = exp(-(B+(SE*zscore)))                          #;println("Ub_pre:= exp(-(B+(SE*zscore)))    :=  exp(-($B+($SE*$zscore))) ")
+    #Ub_pre2 = exp((B+(SE*zscore)))                          #;println("Ub_pre2 = exp((B+(SE*zscore))) :=  exp(($B+($SE*$zscore)))")
+    #Ubt=(mean_score1*(Mt/M))-(mean_score1*Ub_pre*(Mt/M))    #;println("Ubt=(mean_score1*(Xt/X))-(mean_score1*Ub_pre*(Xt/X)) :=  ($mean_score1*($Xt/$X))-($mean_score1*$Ub_pre*($Xt/$X))") 
+    #Ubc=(mean_score0*(Mc/M))-(mean_score0*Ub_pre2*(Mc/M))   #; println("Ubc=(mean_score0*(Xc/X))-(mean_score0*Ub_pre2*(Xc/X))   :=  ($mean_score0*($Xc/$X))-($mean_score0*$Ub_pre2*($Xc/$X))")
+    #Ub = (Ubt-Ubc)/mean_score0                              #; println("Ub = (Ubt+Ubc)/mean_score0  =>   ($Ubt+$Ubc)/$mean_score0")
+    #Lb_pre1 = exp(-(B-(SE*zscore)))
+    #Lb_pre2 = exp((B-(SE*zscore)))
+    #Lb_t = (mean_score1*(Mt/M))-(mean_score1*Lb_pre1*(Mt/M)) 
+    #Lb_c = (mean_score0*(Mc/M))-(mean_score0*Lb_pre2*(Mc/M))
+    #Lb = (Lb_t-Lb_c)/mean_score0
+    
+    
+    return Lb, Ub       
+end
+#lb, ub = calcCI(getMetaDict("total"), 0.84, "o")
+
+
+function write2disk(idf::DataFrame,fname::AbstractString, repvalues::Bool=true)
+    ofile=fname
+    if repvalues
+        writetable(ofile*"tmp", idf, separator = ',', header = true)
+        outfile = open(ofile, "w")
+        open(ofile*"tmp") do filehandle
+            for line in eachline(filehandle)
+                write(outfile, replace(line,"NA",""))
+            end
+        end
+        close(outfile)
+        rm(ofile*"tmp")    
+    else
+        writetable(ofile, idf, separator = ',', header = true)
+    end
+    println("Complete !!!! - output written to ",ofile)
+end
+
+function Base.lowercase(df::DataFrame)
+    for (i,v) in enumerate(names(df))   if v != symbol(lowercase(string(v)))  rename!(df,v,symbol(lowercase(string(v)))) end end 
+end
+
+

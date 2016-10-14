@@ -1,0 +1,2 @@
+gcc -o server.exe server.c
+gcc -o cli.exe cli.c
