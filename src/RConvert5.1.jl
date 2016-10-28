@@ -1,49 +1,8 @@
-addprocs(5)
-using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , JuMP,NLopt, HDF5, JLD, Distributions, MixedModels, RCall, StatsBase, xCommon
-@everywhere using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , JuMP,NLopt, HDF5, JLD, Distributions, MixedModels, RCall, StatsBase, xCommon
+addprocs(3)
+using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , Distributions, MixedModels, StatsBase, StatLib, JSON
+@everywhere using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , Distributions, MixedModels, StatsBase, StatLib, JSON
 
-function loadDF()
-    #cd("/media/u01/analytics/scoring/Healthy/modeling5/")
-    #df_data = readtable("csv_final_healthychoice1_I3.csv",header=true); #lowercase(df_data)
-    #df_h = readtable("Headers_healthy_choice3.csv",header=false); #lowercase(df_data)
-    #names!(df_data, convert(Array{Symbol}, df_h[:x1]) ) 
-    
-    #cd("/media/u01/analytics/scoring/CDW5_792/")
-    cd("/mnt/resource/analytics/CDW5_792/")
-    df_data = readtable("csv_final_cdw5_792.csv",header=false);
-    df_h = readtable("Headers_cdw5.csv",header=false);
-    
-    #df_data = readtable("/media/u01/analytics/scoring/Natural_choice_5_851_modeling/csv_final_nc_851",header=false);
-    #df_h = readtable("/media/u01/analytics/scoring/Natural_choice_5_851_modeling/Headers_NC5.csv",header=false);
-  
-    names!(df_data, convert(Array{Symbol}, df_h[:x1]) )
-end
-df_in=loadDF()
-
-
-function Pre_out(df_in::DataFrame)
-     df_cat_pre = df_in[df_in[:Buyer_Pre_P0] .==1 , [:Prd_0_Net_Pr_PRE,:experian_id]]
-     df_cat_pos = df_in[(df_in[:Buyer_Pre_P0] .==0) & (df_in[:Buyer_Pos_P0] .==1) , [:experian_id]]
-     median_df = median(df_cat_pre[:Prd_0_Net_Pr_PRE])
-     df_cat_pre[:Prd_0_Net_Pr_PRE_med1] = abs(df_cat_pre[:Prd_0_Net_Pr_PRE]-median_df)
-     MAD=median(df_cat_pre[:Prd_0_Net_Pr_PRE_med1])
-     df_cat_pre[:Prd_0_Net_Pr_PRE_med2] = (0.6745*(df_cat_pre[:Prd_0_Net_Pr_PRE]-median_df))/MAD
-     df_cat_pre_zsc = df_cat_pre[abs(df_cat_pre[:Prd_0_Net_Pr_PRE_med2]) .< 3.5,:]
-     df_cat_pre_zsc_1 = df_cat_pre_zsc[:,[:experian_id]]
-     df_cat_pre_zsc_f = vcat(df_cat_pos,df_cat_pre_zsc_1)
-     df_in_pout =  join(df_in, df_cat_pre_zsc_f, on =  :experian_id , kind = :inner);
-end
-df_in_pout = Pre_out(df_in);
-
-
-
-function isValid(df_data::DataFrame,cfg::OrderedDict)
-    function checkValid(iarr::Array{Symbol})  length(setdiff(iarr, names(df_data))) > 0 ? false : true end
-    !checkValid(cfg[:all_mandatory_vars]) ? error("ERROR: Not all mandatory_vars in dataset ") : println("VALID : mandatory_vars") 
-    !checkValid(cfg[:scoring_vars]) ? error("ERROR: Not all scoring_vars in dataset ") : println("VALID : scoring_vars") 
-end
-
-
+ 
 const cfgDefaults=OrderedDict( :P2_Competitor => true
                         ,:pvalue_lvl => 0.20  #pvalue_lvl = 0.20 
                         ,:excludedBreaks => String[]    #["estimated_hh_income","hh_age","number_of_children_in_living_un","person_1_gender"]
@@ -64,15 +23,91 @@ const cfgDefaults=OrderedDict( :P2_Competitor => true
                         ,:TotalModelsOnly=>false
                        )
 
-#NatC : cfgDefaults[:random_demos] = [:estimated_hh_income,:hh_age,:person_1_gender]
-#cfgDefaults[random_campaigns] = [:Targeting_fct,:Media_Source_fct,:Media_Type_fct,:Publisher_fct,:Creative_fct]        
+
+#root="/mnt/resource/analytics/models"
+#Default
 cfgDefaults[:random_demos] = [:estimated_hh_income,:hh_age,:number_of_children_in_living_Un,:person_1_gender]
 cfgDefaults[:random_campaigns] = [:Publisher_Fct1,:Targeting_Fct1]
+cfgDefaults[:exposed_flag_var] = :exposed_flag_new
+root = pwd()
+
+# --------------------------------- CAMPAIGNS ----------------------------------------
+#NatC : 
+cfgDefaults[:random_demos] = [:estimated_hh_income,:hh_age,:person_1_gender]
+cfgDefaults[:random_campaigns] = [:Targeting_fct,:Media_Source_fct,:Media_Type_fct,:Publisher_fct,:Creative_fct]      
+cfgDefaults[:exposed_flag_var] = :exposed_flag_new
+root="/mnt/resource/analytics/models/NatChoice"
+
+#-- CDW
+cfgDefaults[:random_demos] = [:estimated_hh_income,:hh_age,:number_of_children_in_living_Un,:person_1_gender]
+cfgDefaults[:random_campaigns] = [:Publisher_Fct1,:Targeting_Fct1]
+cfgDefaults[:exposed_flag_var] = :exposed_flag_new
+root="/mnt/resource/analytics/models/CDW"
+
+"""
+# JennieO - :creative :publisher1 :placement
+cfgDefaults[:random_demos] = [:estimated_hh_income,:hh_age,:number_of_children_in_living_Un,:person_1_gender]
+cfgDefaults[:random_campaigns] = [:creative,:publisher1,:placement]
+cfgDefaults[:exposed_flag_var] = :exposed_flag_new
+root="/mnt/resource/analytics/models/Jenny-o"
+
+
+# Rev7 
+cfgDefaults[:random_demos] = [:hh_age,:estimated_hh_income,:number_of_children_in_living_Un,:person_1_gender]
+cfgDefaults[:random_campaigns] = [:creativename, :media_source,:media_type,:publisher,:targeting]
+cfgDefaults[:exposed_flag_var] = :exposed_flag_new
+root="/mnt/resource/analytics/models/rev"
+"""
+
+# ------------------------------- END CAMPAIGNS --------------------------------------
+
+
+
+cd(root)
+function loadDF()
+    #cd("/media/u01/analytics/scoring/Healthy/modeling5/")
+    #df_data = readtable("csv_final_healthychoice1_I3.csv",header=true); #lowercase(df_data)
+    #df_h = readtable("Headers_healthy_choice3.csv",header=false); #lowercase(df_data)
+    #names!(df_data, convert(Array{Symbol}, df_h[:x1]) ) 
+  
+    df_data = readtable(root*"/orig.csv",header=false);
+    df_h = readtable(root*"/origHead.csv",header=false);  
+    names!(df_data, convert(Array{Symbol}, df_h[:x1]) )
+end
+df_in=loadDF()
+
+
+
+function Pre_out(df_in::DataFrame)
+     df_cat_pre = df_in[df_in[:Buyer_Pre_P0] .==1 , [:Prd_0_Net_Pr_PRE,:experian_id]]
+     df_cat_pos = df_in[(df_in[:Buyer_Pre_P0] .==0) & (df_in[:Buyer_Pos_P0] .==1) , [:experian_id]]
+     median_df = median(df_cat_pre[:Prd_0_Net_Pr_PRE])
+     df_cat_pre[:Prd_0_Net_Pr_PRE_med1] = abs(df_cat_pre[:Prd_0_Net_Pr_PRE]-median_df)
+     MAD=median(df_cat_pre[:Prd_0_Net_Pr_PRE_med1])
+     df_cat_pre[:Prd_0_Net_Pr_PRE_med2] = (0.6745*(df_cat_pre[:Prd_0_Net_Pr_PRE]-median_df))/MAD
+     df_cat_pre_zsc = df_cat_pre[abs(df_cat_pre[:Prd_0_Net_Pr_PRE_med2]) .< 3.5,:]
+     df_cat_pre_zsc_1 = df_cat_pre_zsc[:,[:experian_id]]
+     df_cat_pre_zsc_f = vcat(df_cat_pos,df_cat_pre_zsc_1)
+     df_in_pout =  join(df_in, df_cat_pre_zsc_f, on =  :experian_id , kind = :inner);
+end
+df_in = Pre_out(df_in);
+
+
+
+function isValid(df_data::DataFrame,cfg::OrderedDict)
+    function checkValid(iarr::Array{Symbol})  length(setdiff(iarr, names(df_data))) > 0 ? false : true end
+    !checkValid(cfg[:all_mandatory_vars]) ? error("ERROR: Not all mandatory_vars in dataset ") : println("VALID : mandatory_vars") 
+    !checkValid(cfg[:scoring_vars]) ? error("ERROR: Not all scoring_vars in dataset ") : println("VALID : scoring_vars") 
+end
+
+
+
+
 
 
 function getCFG(df_in::DataFrame)
-    cfg=xCommon.loadCFG(cfgDefaults, pwd()*"/app.cfg")
-    cfg[:exposed_flag_var] = :exposed_flag_new                  # Go In app.cfg
+    cfg=StatLib.loadCFG(cfgDefaults, pwd()*"/app.cfg")
+    #cfg[:exposed_flag_var] = :exposed_flag_new                  # Go In app.cfg
     #cfg[:random_campaigns] = [:Publisher_Fct1,:Targeting_Fct1]  # Go In app.cfg
 
     cfg[:allrandoms] = vcat(cfg[:random_demos],cfg[:random_campaigns])
@@ -145,7 +180,6 @@ dfd = reworkCFG!(df_in,cfg)
 
 function data_Prep(dfd::DataFrame, cfg::OrderedDict)
     dfd[:isO]=false
-    dfd[:whyO]="" 
     dfd[dfd[:number_of_children_in_living_Un].>=4,:number_of_children_in_living_Un] = 4  # aggregate #of children for 4+ L_114
     if typeof(dfd[:group]) in [DataArray{String,1}] 
         dfd[ findin(dfd[:group],["//N","\\N"]), :group] = "0" 
@@ -171,17 +205,17 @@ function data_Prep(dfd::DataFrame, cfg::OrderedDict)
     end
     # NOTE : Do QCs here
     dfd[dfd[:person_1_gender].=="U",:isO] = true   # remove HHs with no gender info
-    dfd[dfd[:person_1_gender].=="U",:whyO] = "person_1_gender=U; remove HHs with no gender info"
+    #dfd[dfd[:person_1_gender].=="U",:whyO] = "person_1_gender=U; remove HHs with no gender info"
     dfd[findin(dfd[:estimated_hh_income],["U","L"]),:estimated_hh_income]="L" # aggregate U and L levels of hh income
 
     for r in cfg[:random_campaigns]    # check and drop exposed HHs with no publisher info or non-exposed HHs with publisher info
         dfd[findin(dfd[r],["\\N","NULL","0","NONE"])  ,r] ="none"
-        dfd[ (dfd[:isO].==false) & (dfd[r].!="none") & (dfd[:group].==0) ,:whyO] = "non exposed HHs with publisher info"
+        #dfd[ (dfd[:isO].==false) & (dfd[r].!="none") & (dfd[:group].==0) ,:whyO] = "non exposed HHs with publisher info"
         dfd[ (dfd[:isO].==false) & (dfd[r].!="none") & (dfd[:group].==0) ,:isO] = true
-        println(r," non exposed HHs with publisher info : ",nrow(dfd[dfd[:whyO].=="non exposed HHs with publisher info",:] )   )
-        dfd[ (dfd[:isO].==false) & (dfd[r].=="none") & (dfd[:group].!=0) ,:whyO] = "exposed HHs with no publisher info"   
+        #println(r," non exposed HHs with publisher info : ",nrow(dfd[dfd[:whyO].=="non exposed HHs with publisher info",:] )   )
+        #dfd[ (dfd[:isO].==false) & (dfd[r].=="none") & (dfd[:group].!=0) ,:whyO] = "exposed HHs with no publisher info"   
         dfd[ (dfd[:isO].==false) & (dfd[r].=="none") & (dfd[:group].!=0) ,:isO] = true
-        println(r," exposed HHs with no publisher info : ",nrow(dfd[dfd[:whyO].=="exposed HHs with no publisher info",:] )   )
+        #println(r," exposed HHs with no publisher info : ",nrow(dfd[dfd[:whyO].=="exposed HHs with no publisher info",:] )   )
     end
     # segments for outliers detection
     dfd[:data_NB_NE_B] = false
@@ -228,6 +262,7 @@ function MatchMe(dfd::DataFrame,cfg::OrderedDict)
         for (key, value) in countmap(df_exp[cfg[:ProScore]])
             sample_dim=round(Int64,new_unexp_dim*(value/df_exp_dim))
             temp_data = df_unexp[df_unexp[cfg[:ProScore]].==key,:]
+            if sample_dim > size(temp_data,1) sample_dim = size(temp_data,1) end  #??
             samp_data = temp_data[sample(1:size(temp_data,1), sample_dim, replace=false),:]
             sample_control_data = vcat(sample_control_data,    samp_data   )
         end
@@ -255,7 +290,7 @@ function MatchMe(dfd::DataFrame,cfg::OrderedDict)
         end
     end 
     rows2remove = setdiff(dfd[dfd[:isO].==false, :panid],dfd_sample[:panid])
-    dfd[findin(dfd[:panid],rows2remove),:whyO]="NoMatch"
+    #dfd[findin(dfd[:panid],rows2remove),:whyO]="NoMatch"
     dfd[findin(dfd[:panid],rows2remove),:isO]=true 
     return dfd[dfd[:isO].==false, : ]  #[setdiff(names(dfd),[:isO,:whyO])] 
 end
@@ -265,324 +300,127 @@ dfd = MatchMe(dfd,cfg)
 lowercase!(dfd)
 cfg=lowercase(cfg)
 
-
+#SAVE FILE
+writetable(root*"/matched_dfd.csv", dfd)
 
 ######################################
 #------------MODEL OBJECTS-----------#  [:fea_or_dis_trps_shr_dpp_p1,:fea_or_dis_trps_shr_dpp_p2,:fea_or_dis_trps_shr_dpp_p3,:fea_or_dis_trps_shr_dpp_p4]
 ######################################
-@everywhere abstract MModel 
 
-function xResiduals(g::DataFrames.DataFrameRegressionModel)
-    resp = g.model.rr
-    sign(resp.y - resp.mu) .* sqrt(resp.devresid)
+iocc = Dict(:modelName=>:occ, :raneff=>cfg[:random_campaigns], :y_var=>:trps_pos_p1, :logvar=>:LOG_trps_pre_p1, :logvarOrig=>:trps_pre_p1 )
+idolocc = Dict(:modelName=>:dolocc, :raneff=>cfg[:random_campaigns], :y_var=>:dol_per_trip_pos_p1, :logvar=>:LOG_dol_per_trip_pre_p1, :logvarOrig=>:dol_per_trip_pre_p1)
+ipen = Dict(:modelName=>:pen, :raneff=>cfg[:random_campaigns], :y_var=>:buyer_pos_p1, :logvar=>:LOG_buyer_pre_p1, :logvarOrig=>:buyer_pre_p1 )
+
+custom_vars = [:iso,:whyo,:data_nb_ne_b, :data_b_e_nb ,:pen_reduction,:occ_reduction,:dolocc_reduction]  
+for m in [iocc,idolocc,ipen] dfd[m[:logvar]]=log(Array(dfd[m[:logvarOrig]]+1)) end
+
+function genExcludeVars!(iocc::Dict,idolocc::Dict,ipen::Dict)  
+    iocc[:exclude_vars] = vcat( custom_vars,  
+                                [ :buyer_pos_p1, iocc[:logvarOrig]
+                                  ,idolocc[:y_var],idolocc[:logvar],idolocc[:logvarOrig] 
+                                 ,ipen[:y_var],ipen[:logvar],ipen[:logvarOrig] 
+                               ]
+                              )
+    idolocc[:exclude_vars] = vcat( custom_vars,  
+                                   [ :buyer_pos_p1, idolocc[:logvarOrig]
+                                           ,iocc[:y_var],iocc[:logvar],iocc[:logvarOrig] 
+                                           ,ipen[:y_var],ipen[:logvar],ipen[:logvarOrig] 
+                                   ]
+                                 )    
+    
+    ipen[:exclude_vars] = vcat( custom_vars,
+                                [ ipen[:logvarOrig]
+                                  ,iocc[:y_var],iocc[:logvar],iocc[:logvarOrig] 
+                                  ,idolocc[:y_var],idolocc[:logvar],idolocc[:logvarOrig] 
+                                ]
+                                 )        
 end
+genExcludeVars!(iocc,idolocc,ipen)
 
-type xGLM
-    vfactors::Vector{Symbol}
-    fmula::DataFrames.Formula
-    xvars::Vector{Symbol}   
-    model::Any #DataFrameRegressionModel
-    sdf::DataFrame
-    wasSuccessful::Bool
-    resids::DataFrame
- 
-    function xGLM(dfd::DataFrame, dist::Distribution, y_var::Symbol, logvar::Symbol , lnk::Link , vfactors::Array{Symbol} )  
-        this=new()
-        this.wasSuccessful=false
-        this.xvars=Symbol[]
-        this.vfactors=setdiff(vfactors, [y_var,logvar])
-        for l in 1:30
-            this.fmula = genFmula(y_var, this.vfactors, logvar  )
-            try
-                f=this.fmula
-                this.model = glm(f,  dfd[convert(Array{Symbol},vcat(f.lhs,f.rhs.args[3:end]))]  , dist, lnk )
-                
-                this.resids = DataFrame(panid=dfd[:panid], resids=xResiduals(this.model))
-                
-                this.sdf = DataFrame(vars=vcat([:intercept],this.model.mf.terms.terms)  #g.model.mm.assign
-                                     , coef=coef(this.model)
-                                     , se=stderr(this.model)
-                                     , zval=coef(this.model)./stderr(this.model) 
-                                     ,pval= ccdf(FDist(1, dof_residual(this.model)), abs2(coef(this.model)./stderr(this.model))))   
-                """
-                g.model.mm.assign
-                g=m.glm1_pvals
-                DataFrame(vars=vcat([:intercept],g.model.mf.terms.terms)
-                          , coef=coef(g.model)
-                          , se=stderr(g.model)
-                          , zval=coef(g.model)./stderr(g.model) 
-                          ,pval= ccdf(FDist(1, dof_residual(g.model)), abs2(coef(g.model)./stderr(g.model))))  
-                """
-                this.wasSuccessful=true
-                break
-            catch e
-                if isa(e, Base.LinAlg.PosDefException)
-                    v=this.vfactors[e.info-1]
-                    push!(this.xvars,v)
-                    println("!!! Multicollinearity, removing :",v,"~~~",e.info-1, "\n~~~",e)
-                else
-                    println("....",e)
-                    break
-                end
-            end
-        end
-        return this 
+
+function expandM(di::Dict)
+    d2=deepcopy(di)
+    if d2[:modelName]==:occ  
+        d2[:dist] = Poisson()
+        d2[:lnk] = LogLink()
+        d2[:Buyer_Pos_P1_is1] = true
     end
-end
- 
-
-type MDolOcc <: MModel
-    vars::Vector{Symbol}
-    finalvars::Vector{Symbol}
-    y_var::Symbol
-    dist::Distribution
-    lnk::Link
-    exclude_vars::Vector{Symbol}
-    removed_SingleLevelVars::Vector{Symbol}
-    singularity_x::Vector{Symbol}
-    glm1_pvals::xGLM
-    glm1_pvals_x::Vector{Symbol}
-    glm2_ZnVIF::xGLM
-    glm2_ZnVIF_x::Vector{Symbol}
-    glm3_PnSigns::xGLM
-    glm3_PnSigns_x::Vector{Symbol}
-    glm4_PnSignsClean::xGLM
-    glm4_PnSignsClean_x::Vector{Symbol}
-    glm5::xGLM
-    glm5_Z_x::Vector{Symbol}
-    corrvars_x::Vector{Symbol}
-    glm6_final::xGLM
-    Buyer_Pos_P1_is1::Bool
-    modelName::String
-    logvar::Symbol
-    logvar_colname::Symbol
-    fdf::DataFrame
-    rdf::DataFrame
-    df_resid::DataFrame
-    groupDeviance::Float64
-    function MDolOcc(dfd::DataFrame,cfg::OrderedDict=Dict()) 
-        this=new(); this.modelName="dolocc"; this.logvar=cfg[:dolocc_logvar]; this.y_var=cfg[:dolocc_y_var]; this.dist=Gamma()
-        this.logvar_colname = cfg[:dolocc_logvar_colname]
-        this.lnk=LogLink()
-        this.removed_SingleLevelVars=Symbol[]
-        this.glm1_pvals_x=Symbol[]
-        this.glm2_ZnVIF_x=Symbol[]
-        this.glm3_PnSigns_x=Symbol[]
-        this.glm4_PnSignsClean_x=Symbol[]
-        this.corrvars_x=Symbol[]
-        this.exclude_vars= Symbol[ cfg[:occ_y_var],cfg[:occ_logvar],cfg[:occ_logvar_colname],cfg[:pen_y_var],cfg[:pen_logvar],cfg[:pen_logvar_colname], :buyer_pos_p1 ]
-        this.Buyer_Pos_P1_is1=true
-        dfd[this.logvar_colname] = log(Array(dfd[this.logvar]+1))
-        this.vars=setdiff(names(dfd),vcat(this.exclude_vars,[:iso,:whyo,:data_nb_ne_b, :data_b_e_nb ,:pen_reduction,:occ_reduction,:dolocc_reduction]))
-        this.vars=setdiff(this.vars,[this.logvar, this.logvar_colname])
-        return this 
+    if d2[:modelName]==:dolocc  
+        d2[:dist] = Gamma()
+        d2[:lnk] = LogLink()
+        d2[:Buyer_Pos_P1_is1] = true
     end
-end
-mdolocc = MDolOcc(dfd,cfg)
-
-
-
-
-
-type MOcc <: MModel
-    vars::Vector{Symbol}
-    finalvars::Vector{Symbol}
-    y_var::Symbol
-    dist::Distribution
-    lnk::Link
-    exclude_vars::Vector{Symbol}
-    singularity_x::Vector{Symbol}
-    removed_SingleLevelVars::Vector{Symbol}
-    glm1_pvals::xGLM
-    glm1_pvals_x::Vector{Symbol}
-    glm2_ZnVIF::xGLM
-    glm2_ZnVIF_x::Vector{Symbol}
-    glm3_PnSigns::xGLM
-    glm3_PnSigns_x::Vector{Symbol}
-    glm4_PnSignsClean::xGLM
-    glm4_PnSignsClean_x::Vector{Symbol}
-    glm5::xGLM
-    glm5_Z_x::Vector{Symbol}
-    corrvars_x::Vector{Symbol}
-    glm6_final::xGLM
-    Buyer_Pos_P1_is1::Bool
-    modelName::String
-    logvar::Symbol
-    logvar_colname::Symbol
-    fdf::DataFrame
-    rdf::DataFrame
-    df_resid::DataFrame
-    groupDeviance::Float64
-    function MOcc(dfd::DataFrame,cfg::OrderedDict=Dict()) 
-        this=new(); this.modelName="occ"; this.logvar=cfg[:occ_logvar]; this.y_var=cfg[:occ_y_var]; this.dist=Poisson()
-        this.logvar_colname = cfg[:occ_logvar_colname]
-        this.lnk=LogLink()
-        this.removed_SingleLevelVars=Symbol[]
-        this.glm1_pvals_x=Symbol[]
-        this.glm2_ZnVIF_x=Symbol[]
-        this.glm3_PnSigns_x=Symbol[]
-        this.glm4_PnSignsClean_x=Symbol[]
-        this.corrvars_x=Symbol[]
-        this.exclude_vars=Symbol[cfg[:dolocc_y_var],cfg[:dolocc_logvar],cfg[:dolocc_logvar_colname],cfg[:pen_y_var],cfg[:pen_logvar],cfg[:pen_logvar_colname], :buyer_pos_p1 ]
-        this.Buyer_Pos_P1_is1=true
-        #dfd[this.logvar_colname] = log(Array(dfd[this.logvar]+1))
-        this.vars=setdiff(names(dfd),vcat(this.exclude_vars,[:iso,:whyo,:data_nb_ne_b, :data_b_e_nb ,:pen_reduction,:occ_reduction,:dolocc_reduction]))
-        this.vars=setdiff(this.vars,[this.logvar, this.logvar_colname])
-        return this 
+    if d2[:modelName]==:pen
+        d2[:dist] = Bernoulli()
+        d2[:lnk] = LogitLink()
+        d2[:Buyer_Pos_P1_is1] = false
     end
+    return d2
 end
-mocc = MOcc(dfd,cfg)
-
-
-
-type MPen <: MModel
-    vars::Vector{Symbol}
-    finalvars::Vector{Symbol}
-    y_var::Symbol
-    dist::Distribution
-    lnk::Link
-    exclude_vars::Vector{Symbol}
-    singularity_x::Vector{Symbol}
-    removed_SingleLevelVars::Vector{Symbol}
-    glm1_pvals::xGLM
-    glm1_pvals_x::Vector{Symbol}
-    glm2_ZnVIF::xGLM
-    glm2_ZnVIF_x::Vector{Symbol}
-    glm3_PnSigns::xGLM
-    glm3_PnSigns_x::Vector{Symbol}
-    glm4_PnSignsClean::xGLM
-    glm4_PnSignsClean_x::Vector{Symbol}
-    glm5::xGLM
-    glm5_Z_x::Vector{Symbol}
-    corrvars_x::Vector{Symbol}
-    glm6_final::xGLM
-    Buyer_Pos_P1_is1::Bool
-    modelName::String
-    logvar::Symbol
-    logvar_colname::Symbol
-    fdf::DataFrame
-    rdf::DataFrame
-    df_resid::DataFrame
-    groupDeviance::Float64
-    function MPen(dfd::DataFrame,cfg::OrderedDict=Dict()) 
-        this=new(); this.modelName="pen"; this.logvar=cfg[:pen_logvar]; this.y_var=cfg[:pen_y_var]; this.dist=Bernoulli() #Binomial()
-        this.logvar_colname = cfg[:pen_logvar_colname]
-        this.lnk=LogitLink()
-        this.removed_SingleLevelVars=Symbol[]
-        this.glm1_pvals_x=Symbol[]
-        this.glm2_ZnVIF_x=Symbol[]
-        this.glm3_PnSigns_x=Symbol[]
-        this.glm4_PnSignsClean_x=Symbol[]
-        this.corrvars_x=Symbol[]     
-        this.exclude_vars=Symbol[cfg[:occ_y_var],cfg[:occ_logvar],cfg[:occ_logvar_colname],cfg[:dolocc_y_var],cfg[:dolocc_logvar],cfg[:dolocc_logvar_colname] ]
-        this.Buyer_Pos_P1_is1=false
-        #dfd[this.logvar_colname] = log(Array(dfd[this.logvar]+1))
-        this.vars=setdiff(names(dfd),vcat(this.exclude_vars,[:iso,:whyo,:data_nb_ne_b, :data_b_e_nb ,:pen_reduction,:occ_reduction,:dolocc_reduction]))    
-        this.vars=setdiff(this.vars,[this.logvar, this.logvar_colname])
-        return this 
-    end
-end
-mpen = MPen(dfd,cfg)
-
-
-
-    include("/home/iriadmin/.julia/v0.5/RegTools/src/diagnostics.jl")
-    include("/home/iriadmin/.julia/v0.5/RegTools/src/misc.jl")
-    include("/home/iriadmin/.julia/v0.5/RegTools/src/modsel.jl")
-
-#include("/media/u01/analytics/RegTools/diagnostics.jl")
-#include("/media/u01/analytics/RegTools/misc.jl")
-#include("/media/u01/analytics/RegTools/modsel.jl")
-
-
-function vif!(g::xGLM)
-    vdf=vif(g.model)
-    vdf[:vars] = convert(Array{Symbol}, vdf[:variable])
-    g.sdf = join(g.sdf,vdf[[:vars,:vif]], on = :vars, kind=:outer)
-end
+#expandM(t)
 
 
 
 
-function checksingularity(form::Formula, data::DataFrame, tolerance = 1.e-8)
-    mf = ModelFrame(form, data)
-    mm = ModelMatrix(mf)
-    qrf = qrfact!(mm.m, Val{true})
-    vals = abs.(diag(qrf[:R]))
-    firstbad = findfirst(x -> x < min(tolerance, 0.5) * vals[1], vals)
-    if firstbad == 0
-        return Symbol[]
-    end
-    mf.terms.terms[view(mm.assign[qrf[:p]], firstbad:length(vals))]
-end
+#function checksingularity(f::Formula, dfd::DataFrame, tolerance = 1.e-8)
+#    mf = ModelFrame(f, dfd)
+#    mm = ModelMatrix(mf)
+#    qrf = qrfact!(mm.m, Val{true})
+#    vals = abs.(diag(qrf[:R]))
+#    firstbad = findfirst(x -> x < min(tolerance, 0.5) * vals[1], vals)
+#    if firstbad == 0
+#        return Symbol[]
+#    end
+#    mf.terms.terms[view(mm.assign[qrf[:p]], firstbad:length(vals))]
+#end
 
 
 
-# =======================================================================================
-# =======================================================================================
-
-#using IRImodels
-
-dfd[mocc.logvar_colname]=log(Array(dfd[mocc.logvar]+1))
-dfd[mdolocc.logvar_colname]=log(Array(dfd[mdolocc.logvar]+1))
-dfd[mpen.logvar_colname]=log(Array(dfd[mpen.logvar]+1))
-
-function featureSelection(dfd::DataFrame, m::MModel)
+function featureSelection(dfd::DataFrame, m::Dict)
+    function rmVars(v::DataArray{Any}) rmVars(convert(Array{Symbol},v)) end
+    function rmVars(v::Array{Any}) rmVars(convert(Array{Symbol},v)) end
     function rmVars(v::Array{Symbol})
         v=setdiff(v,[:group])
-        return setdiff(vars,v)
+        return setdiff(vars,v)  
     end        
-    
-    custom_vars=[:dolocc_reduction,:occ_reduction,:pen_reduction,:data_b_e_nb,:data_nb_ne_b,:whyo,:iso]
-    required_vars=vcat([m.y_var,:panid,m.logvar],cfg[:random_demos],cfg[:random_campaigns],cfg[:scoring_vars])
-    vars=setdiff(vcat(m.vars,[m.logvar_colname]),vcat(required_vars,custom_vars))
-    
-    println(uppercase(mocc.modelName)*" : SingleValue") #SingleValue
-    m.removed_SingleLevelVars=FS_singleLevel(dfd,vars)
-    vars = rmVars(m.removed_SingleLevelVars)
-    
-    println(uppercase(mocc.modelName)*" : Singularity : "*string(genFmula(m.y_var,vars,m.logvar))) # Singularity
-    m.singularity_x = checksingularity(genFmula(m.y_var,vars,m.logvar), dfd)
-    vars = rmVars(m.singularity_x)
-    
-    println(uppercase(mocc.modelName)*" : PVals") #PVals
-    m.glm1_pvals = xGLM(dfd, m.dist, m.y_var, m.logvar, m.lnk , vars  )  
-    g1=m.glm1_pvals
-    m.glm1_pvals_x=g1.sdf[g1.sdf[:pval].>0.7,:vars]
-    vars = rmVars(vcat(m.glm1_pvals_x, g1.xvars ) )
-    
-    println(uppercase(mocc.modelName)*" : Z & Vif") #Z & Vif
-    m.glm2_ZnVIF = xGLM(dfd, m.dist, m.y_var, m.logvar, m.lnk ,vars  ) 
-    g2=m.glm2_ZnVIF
-    vif!(g2)
-    z = g2.sdf[abs(g2.sdf[:zval]).<1.96,:vars]
-    v = g2.sdf[ !DataArrays.isna(g2.sdf[:vif])&(g2.sdf[:vif].>15),:vars]
-    m.glm2_ZnVIF_x =intersect(z,v)
-    vars = rmVars(vcat(m.glm2_ZnVIF_x, g2.xvars) )
-
-
-    function chkSigns(m::MModel, vars::Array{Symbol}, dfd::DataFrame, cfg::OrderedDict)  # Pvalue & Signs
+    vars=setdiff(names(dfd),   vcat(m[:exclude_vars],m[:y_var],:panid,cfg[:random_demos],cfg[:random_campaigns],cfg[:scoring_vars]) )
+    upperModName = uppercase( string(  m[:modelName]  )  )
+    println( upperModName*" : SingleValue") #SingleValue
+    removed_SingleLevelVars=FS_singleLevel(dfd,vars)
+    vars = rmVars(removed_SingleLevelVars)
+    println(upperModName*" : Singularity : "*string(genF(m[:y_var],vars))) # Singularity
+    singularity_x = checksingularity(genF(m[:y_var],vars), dfd)
+    vars = rmVars(singularity_x)
+    println(upperModName*" : PVals") #PVals
+    f=genF(m[:y_var],vars)
+    g1 = glm( f, dfd[convert(Array{Symbol},vcat(f.lhs,f.rhs.args[3:end]))]  , m[:dist], m[:lnk] )
+    sdf = coefDF(g1)
+    g1_x= sdf[sdf[:pval].>0.7,:vars]
+    vars = rmVars(g1_x)
+    function chkSigns(m::Dict, vars::Array{Symbol}, dfd::DataFrame, cfg::OrderedDict)  # Pvalue & Signs
         vars=unique(vcat(vars,[:group]))
-        g = xGLM(dfd, m.dist, m.y_var, m.logvar, m.lnk , vars  )  
+        f=genF(m[:y_var],vars)
+        g = glm( f, dfd[convert(Array{Symbol},vcat(f.lhs,f.rhs.args[3:end]))]  , m[:dist], m[:lnk] )
+        sdf = coefDF(g1)
         neutralvars = setdiff(vars,vcat(cfg[:negativevars],cfg[:positivevars])) 
-        neg=intersect(cfg[:negativevars],g.sdf[g.sdf[:coef].<0,:vars])
-        pos=intersect(cfg[:positivevars],g.sdf[g.sdf[:coef].>0,:vars])
-        varstokeep = intersect(vcat(neutralvars, pos,neg) ,  g.sdf[ g.sdf[:pval].<cfg[:pvalue_lvl] ,:vars] )
+        neg=intersect(cfg[:negativevars],sdf[sdf[:coef].<0,:vars])
+        pos=intersect(cfg[:positivevars],sdf[sdf[:coef].>0,:vars])
+        varstokeep = intersect(vcat(neutralvars, pos,neg) ,  sdf[sdf[:pval].<cfg[:pvalue_lvl] ,:vars] )
+        varstokeep =  convert(Array{Symbol},varstokeep)
         return g, varstokeep
     end
-
-    println(uppercase(mocc.modelName)*" : SIGN Check 1") 
-    (m.glm3_PnSigns, initialvars) = chkSigns(m, vars, dfd, cfg)
-    println(uppercase(mocc.modelName)*" : SIGN Check 2") 
-    (m.glm4_PnSignsClean, vars_2) = chkSigns(m, convert(Array{Symbol},initialvars) , dfd, cfg)
-
-
-    function getCorrVars(dfd::DataFrame, vars_2::Array{Symbol})
+    println(upperModName*" : SIGN Check 1") 
+    (g3, initialvars) = chkSigns(m, vars, dfd, cfg)
+    println(upperModName*" : SIGN Check 2") 
+    (g4, vars_2) = chkSigns(m, initialvars, dfd, cfg)
+    function getCorrVars(m::RegressionModel, dfd::DataFrame, vars_2::Array{Symbol})
+        sdf = coefDF(m)
+        vars_2 = convert(Array{Symbol}, setdiff(vars_2, filter(x-> typeof(dfd[x]) in [PooledDataArray{String,UInt8,1}], vars_2)) )
         rm_lst=Symbol[]
-        if (length(vars_2) > 1) & (   length(getColswithType("num", dfd, convert(Array{Symbol},vars_2) ) ) > 1  )
-            stackdf = corrDFD(dfd,vars_2)
-            stackdf[:variable_pval] = [ m.glm4_PnSignsClean.sdf[m.glm4_PnSignsClean.sdf[:vars].==c,:pval][1]   for c in stackdf[:variable]]
-            stackdf[:vars_pval] = [ m.glm4_PnSignsClean.sdf[m.glm4_PnSignsClean.sdf[:vars].==c,:pval][1]   for c in stackdf[:vars]] 
+        if (length(vars_2) > 1) & (   length(getColswithType("num", dfd, vars_2 ) ) > 1  )
+            stackdf = corDFD(dfd,vars_2)
+            stackdf[:variable_pval] = [ sdf[sdf[:vars].==c,:pval][1]   for c in stackdf[:variable]]
+            stackdf[:vars_pval] = [ sdf[sdf[:vars].==c,:pval][1]   for c in stackdf[:vars]] 
             stackdf[:most_Sig] = map((x,y) -> x < y ? "variable" : "vars" ,stackdf[:variable_pval],stackdf[:vars_pval])
      
             for row in eachrow(stackdf[(stackdf[:value].> 0.8) | (stackdf[:value].<-0.8),:])
@@ -597,24 +435,30 @@ function featureSelection(dfd::DataFrame, m::MModel)
         end
         return rm_lst
     end
+    println(upperModName*" : Correlation") 
+    corrvars_x = getCorrVars(g4, dfd,vars_2  )
+    vars_2 = setdiff(vars_2,corrvars_x)    
+    (g5, finalvars) =  chkSigns(m, convert(Array{Symbol},vars_2), dfd, cfg)
     
-    println(uppercase(mocc.modelName)*" : Correlation") 
-    m.corrvars_x = getCorrVars(dfd,convert(Array{Symbol},setdiff(vars_2,factor_cols)))
-    vars_2 = setdiff(vars_2,m.corrvars_x)
-    
-    (m.glm5, m.finalvars) =  chkSigns(m, convert(Array{Symbol},vars_2), dfd, cfg)
-    
-    println(uppercase(mocc.modelName)*" : Final Review") # Final Review:
-    m.glm6_final = xGLM(dfd, m.dist, m.y_var, m.logvar, m.lnk , convert(Array{Symbol},vcat(m.finalvars,[:group]))  )
-    #rename!(m.glm6_final.resids,:resids,Symbol(m.modelName*"_residual"))
-    m.df_resid = m.glm6_final.resids
-    return m.glm6_final
+    #VIF is only valid on multiple cols
+    if length(finalvars) > 2     
+        println( upperModName *" : Z & Vif") #Z & Vif
+        f=genF(m[:y_var],finalvars)
+        g2 = glm( f, dfd[convert(Array{Symbol},vcat(f.lhs,f.rhs.args[3:end]))]  , m[:dist], m[:lnk] )
+        sdf=vifDF(g2)
+        z = sdf[abs(sdf[:zval]).<1.96,:vars]
+        v = sdf[ !DataArrays.isna(sdf[:vif])&(sdf[:vif].>15),:vars]
+        g2_x =intersect(z,v)
+        finalvars = setdiff(finalvars,g2_x)
+        println("vif_vars: ",g2_x)
+    end
+    finalvars = setdiff(finalvars,[:group])# reorder for group
+    finalvars = convert(Array{Symbol},vcat(finalvars,[:group]) )
+    return finalvars
 end
 
 
 factor_cols=vcat( [ cfg[:proscore], :group, :panid], cfg[:allrandoms] )
-
-# -- convert factor ints to strings --
 for c in setdiff(factor_cols,[:panid, cfg[:proscore]]) #cfg[:random_campaigns]
     if !( typeof(dfd[c]) in [  DataArray{String,1}  ]) 
         println("converting to Strings : ", c," of type : ",typeof(dfd[c]))
@@ -625,19 +469,18 @@ end
 poolit!(dfd,factor_cols)
 
 
+iocc[:finalvars] = featureSelection(dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:], expandM(iocc))
+idolocc[:finalvars]   = featureSelection(dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:], expandM(idolocc))
+ipen[:finalvars]  = featureSelection(dfd[(dfd[:iso].==false) ,:], expandM(ipen))
 
-featureSelection(dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:], mocc)
-featureSelection(dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:], mdolocc)
-featureSelection(dfd[(dfd[:iso].==false) ,:], mpen)
-
-
-
-
+#m=expandM(ipen)
+#glm(genF(m[:y_var],m[:finalvars]), dfd[vcat(m[:y_var],m[:finalvars])], m[:dist], m[:lnk])
 
 
 
-function getOutliers(dfd::DataFrame, m::MModel,segment::Symbol,pct::Int64) # :data_nb_ne_b, :data_b_e_nb, :pen_reduction, :occ_reduction, :dolocc_reduction
-    if m.Buyer_Pos_P1_is1
+# --- Removing outlliers - to ensure overall campaign uplift
+function getOutliers(r::DataFrame, dfd::DataFrame, m::Dict, segment::Symbol,pct::Int64) # :data_nb_ne_b, :data_b_e_nb, :pen_reduction, :occ_reduction, :dolocc_reduction
+    if m[:Buyer_Pos_P1_is1]
         println("pre=1")
         odf = dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1)&(dfd[segment].==true),:panid]
     else
@@ -645,30 +488,40 @@ function getOutliers(dfd::DataFrame, m::MModel,segment::Symbol,pct::Int64) # :da
         odf = dfd[(dfd[:iso].==false)&(dfd[segment].==true),:panid]
     end
     pctnum = Integer(round(length(odf) / 100) * pct)
-    r = m.glm6_final.resids
     return sort(r[findin(r[:panid],odf) ,:], cols=[order(:resids, rev = true)] )[1:pctnum,:panid]
 end
 
+function genGLM(dfd::DataFrame, m::Dict)
+    f=genF(m[:y_var],m[:finalvars])
+    println("GLM for ",m[:modelName]," ::: ",f)
+    dfd_tmp = m[:modelName] in [:occ, :dolocc] ? dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:] : dfd[(dfd[:iso].==false),:] 
+    g = glm(f, dfd_tmp[vcat(m[:y_var],m[:finalvars])], m[:dist], m[:lnk])
+    println("GLM Residuals for ",m[:modelName])
+    r = DataFrame(panid=dfd_tmp[:panid], resids=StatLib.xResiduals(g))
+    return r, g 
+end
 
+function genlists(dfd::DataFrame, iocc::Dict,idolocc::Dict,ipen::Dict)   
+    r1, g1 = genGLM( dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:], expandM(iocc))
+    r2, g2 = genGLM( dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:], expandM(idolocc))
+    r3, g3 = genGLM( dfd[(dfd[:iso].==false),:], expandM(ipen))
+    rlist = [r1,r2,r3]
+    glist = [g1,g2,g3]
+    return rlist, glist
+end
+rlist, glist = genlists(dfd,iocc,idolocc,ipen) 
 
-
-# --- Removing outlliers - to ensure overall campaign uplift
 for i in 1:5
-    mlist = [mocc,mdolocc,mpen]
-    mliftβ = [ m.glm6_final.sdf[m.glm6_final.sdf[:vars].==:group,:coef][1] for m in mlist]
+    mlist = [expandM(iocc),expandM(idolocc),expandM(ipen)]
+    #mliftβ = [ g.sdf[g.sdf[:vars].==:group,:coef][1] for g in glist]
+    mliftβ = [ sdf[sdf[:vars].==:group,:coef][1] for sdf in [coefDF(m) for m in glist]]
     minidx = find(x->x==minimum(mliftβ),mliftβ)[1]
     if  mliftβ[minidx] < 0.0
-        mx=mlist[minidx]
-        println("WRONG : ",mliftβ," for ",mx.modelName)
-        panids = getOutliers(dfd,mx,:data_nb_ne_b,5)
+        #mx=mlist[minidx]
+        println("WRONG : ",mliftβ," for ",mlist[minidx][:modelName])
+        panids = getOutliers(rlist[minidx], dfd, mlist[minidx], :data_nb_ne_b,5)
         dfd[findin(dfd[:panid],panids) ,:iso] = true
-        for m in mlist
-            if m.Buyer_Pos_P1_is1
-                m.glm6_final = xGLM(dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:], m.dist, m.y_var, m.logvar, m.lnk , convert(Array{Symbol},vcat(m.finalvars,[:group]))  )
-            else
-                m.glm6_final = xGLM(dfd[(dfd[:iso].==false),:], m.dist, m.y_var, m.logvar, m.lnk , convert(Array{Symbol},vcat(m.finalvars,[:group]))  )
-            end
-        end
+        rlist, glist = genlists(dfd,iocc,idolocc,ipen) 
     else
         println("All good : ",mliftβ)
         break
@@ -678,59 +531,179 @@ end
 
 
 # ---- SAVE RESULTS -----------
+delete!(iocc, :exclude_vars)
+delete!(idolocc, :exclude_vars)
+delete!(ipen, :exclude_vars)
 
-jmod_fname = "/mnt/resource/analytics/CDW5_792/models.json"
-dfd_fname = "/mnt/resource/analytics/CDW5_792/dfd.csv"
-mod_fname = "/mnt/resource/analytics/CDW5_792/dfd_model.csv" #writetable("output.csv", df)
-for c in factor_cols #cfg[:random_campaigns]
-    #println(typeof(dfd[c]))
-    if typeof(dfd[c]) in [ PooledDataArray{String,UInt8,1} ]
-        println("         Converting : ", c )
-        dfd[c] = Array(dfd[c])
+modelsDict = Dict()
+modelsDict[:iocc] = iocc
+modelsDict[:idolocc] = idolocc
+modelsDict[:ipen] = ipen
+
+
+function unpool(dfd::DataFrame)
+    v_factors = Symbol[]
+    for c in names(dfd)
+        if typeof(dfd[c]) in [ PooledDataArray{String,UInt8,1} ]
+            println("         Converting : ", c )
+            push!(v_factors,c)
+            dfd[c] = Array(dfd[c])
+        end
     end
+    return v_factors
 end
-writetable(dfd_fname, dfd)
-#cols = vcat(mocc.finalvars,mdolocc.finalvars, [:group, :buyer_pos_p1, mdolocc.y_var, mdolocc.logvar, mocc.y_var, mocc.logvar],cfg[:random_campaigns])
-cols = vcat([:group, :buyer_pos_p1],cfg[:random_campaigns])
-cols = vcat(cols,mocc.finalvars,[mocc.y_var, mocc.logvar])
-cols = vcat(cols,mdolocc.finalvars,[mdolocc.y_var, mdolocc.logvar])
-cols = unique(vcat(cols,mpen.finalvars,[mpen.y_var, mpen.logvar]) )
+
+modelsDict[:factors] = unpool(dfd) 
+
+jmod_fname = root*"/dfd_model.json"
+mod_fname = root*"/dfd_model.csv" 
+
+writetable(root*"/dfd_postOutliers.csv", dfd)
+cols = vcat([:panid, :iso, :group, :buyer_pos_p1],cfg[:random_campaigns])
+cols = vcat(cols,iocc[:finalvars],[iocc[:y_var], iocc[:logvar]])
+cols = vcat(cols,idolocc[:finalvars],[idolocc[:y_var], idolocc[:logvar]])
+cols = unique(vcat(cols,ipen[:finalvars],[ipen[:y_var], ipen[:logvar]]) )
 writetable(mod_fname, dfd[ (dfd[:iso].==false) ,cols])
 
 
-using JSON
+#using JSON
 
-function saveModels(fname::String)
-    function writejson(path::String,jstring::String)
-        open(path,"w") do f
-            write(f,jstring)
-        end
-    end
-    o = Dict(:raneff=>cfg[:random_campaigns], :y_var=>mocc.y_var, :logvar=>mocc.logvar, :finalvars=>mocc.finalvars )
-    d = Dict(:raneff=>cfg[:random_campaigns], :y_var=>mdolocc.y_var, :logvar=>mdolocc.logvar, :finalvars=>mdolocc.finalvars )
-    p = Dict(:raneff=>cfg[:random_campaigns], :y_var=>mpen.y_var, :logvar=>mpen.logvar, :finalvars=>mpen.finalvars )
-    d = Dict(:mocc=>o,:mdolocc=>d, :mpen=>p)
+function saveModels(d::Dict,fname::String)
     j = JSON.json([ d])
-    writejson(fname,j)
+    open(fname,"w") do f
+        write(f,j)
+    end
 end
-saveModels(jmod_fname)
+saveModels(modelsDict, jmod_fname)
 
 
+function distributeDataset()
+    #jmod_fname = root*"/dfd_model.json"
+    #mod_fname
+    #ppp="/mnt/resource/analytics/models/"; run(`ls $ppp`)
+    ips = ["10.63.36.18", "10.63.36.22","10.63.36.23"]
+    ip="10.63.36.22"
+    for ip in ips
+        #run(`ssh $ip mkdir $root`)
+        run(`scp $root/dfd_model.* $ip:$root/`)
+    end
+end
+#j = readModels(jmod_fname)
 #group & raneff
 
 
 
 
 # ---- END SAVE RESULTS -------
+"""
+function gethostModelDistribution(raneff::Array{Symbol})
+    function allocateCore(a::Array{Int64})
+        proc = a[1]
+        ao = length(setdiff(a,proc)) > 0 ?  setdiff(a,proc) : a
+        return proc, ao
+    end
+    nodehosts = gethostworkers()
+    hosts = [k for k in keys(nodehosts)]
+    hostcnt = length(hosts)
+    #raneff = [:creative, :publisher1, :placement]
+    h=1
+    m=:pen
+    penprocs = Dict()
+    for r in raneff
+        proc, nodehosts[hosts[h]] = allocateCore(nodehosts[hosts[h]])
+        penprocs[r] = Dict(:proc=>proc, :host=>hosts[h])
+        println(r,"  :  ", hosts[h], "  ",proc)
+        h = h == hostcnt ? h=1 : h+1
+    end
+    
+    static_nodehosts = deepcopy(nodehosts)
+    
+    println("Pen : ",penprocs )
+    println(nodehosts)
+end
+
+gethostModelDistribution([:creative, :publisher1, :placement])
+
+function raneffStats(raneff::Array{Symbol})
+    #ranef = modelsDict[:ipen][:raneff]
+    
+end
+"""
+
+
 
 # -------- RESTART FROM HERE ------------
-addprocs(5)
-using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , JuMP,NLopt, HDF5, JLD, Distributions, MixedModels, RCall, StatsBase, xCommon
-@everywhere using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , JuMP,NLopt, HDF5, JLD, Distributions, MixedModels, RCall, StatsBase, xCommon
-dfd_fname = "/mnt/resource/analytics/CDW5_792/dfd.csv"
-mod_fname = "/mnt/resource/analytics/CDW5_792/dfd_model.csv" #writetable("output.csv", df)
-jmod_fname = "/mnt/resource/analytics/CDW5_792/models.json"
-# -------- END RESTART FROM HERE ------------
+#addprocs([("iriadmin@10.63.36.22", :auto), ("iriadmin@10.63.36.23", :auto)])
+#using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , JuMP,NLopt, Distributions, MixedModels, StatsBase,  JSON
+#@everywhere using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , JuMP,NLopt, Distributions, MixedModels, StatsBase,  JSON
+
+#addprocs(5)
+#using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , JuMP,NLopt, HDF5, JLD, Distributions, MixedModels, RCall, StatsBase, StatLib, JSON
+#@everywhere using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , JuMP,NLopt, HDF5, JLD, Distributions, MixedModels, RCall, StatsBase, StatLib, JSON
+#/mnt/resource/analytics/models CDW  Jenny-o  NatChoice  rev
+
+#addprocs([("iriadmin@10.63.36.22", 2), ("iriadmin@10.63.36.23", 2)])
+addprocs([("iriadmin@10.63.36.22", 2)])
+addprocs(2)
+using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , Distributions, MixedModels, StatsBase, JSON
+@everywhere using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , Distributions, MixedModels, StatsBase, JSON
+
+
+#root=pwd()
+#root = "/mnt/resource/analytics/Natural_choice_5_851_modeling"   
+root="/mnt/resource/analytics/models/Jenny-o"
+#root="/mnt/resource/analytics/scoring/Jennie-o_1_020916_Modeling"
+root="/mnt/resource/analytics/models/rev"
+
+jmod_fname = root*"/dfd_model.json"
+mod_fname = root*"/dfd_model.csv" 
+
+
+
+
+
+function gethostworkers()
+    d = Dict()
+    @sync @async for (idx, pid) in enumerate(workers())
+        d[pid] = remotecall_fetch(getipaddr,pid)
+    end
+    iout=Dict()
+    for ip in [string(ip) for ip in unique(values(d))]
+        a=Int64[]
+        for (key, value) in d
+            if string(value) == ip
+                push!(a,key)
+            end
+        end    
+        iout[ip] = sort(a)
+    end
+    l = get(iout,string(getipaddr()),[])
+    iout[string(getipaddr())] = convert(Array{Int64},vcat([1],l))
+    return iout
+end
+
+
+
+#  --- functions from StatLib ---
+@everywhere function expandM(di::Dict)
+    d2=deepcopy(di)
+    if d2[:modelName]==:occ  
+        d2[:dist] = Poisson()
+        d2[:lnk] = LogLink()
+        d2[:Buyer_Pos_P1_is1] = true
+    end
+    if d2[:modelName]==:dolocc  
+        d2[:dist] = Gamma()
+        d2[:lnk] = LogLink()
+        d2[:Buyer_Pos_P1_is1] = true
+    end
+    if d2[:modelName]==:pen
+        d2[:dist] = Bernoulli()
+        d2[:lnk] = LogitLink()
+        d2[:Buyer_Pos_P1_is1] = false
+    end
+    return d2
+end
 
 
 
@@ -777,47 +750,519 @@ jmod_fname = "/mnt/resource/analytics/CDW5_792/models.json"
     end
 end
 
-#j = readModels(jmod_fname)
 
 
-
-@everywhere function repool!(dfd::DataFrame,vars::Array{Symbol})
-    for c in vars
-        if c in names(dfd)
-            if typeof(dfd[c]) != PooledDataArray{String,UInt8,1}
-                println("repooling : ",c)
-                dfd[c] = pool(dfd[c])
+@everywhere function poolit!(dfd::DataFrame, vars::Array{Symbol}=Symbol[])
+    if length(vars) == 0   vars=names(dfd) end
+    for (i, c) in enumerate(dfd.columns)
+        if typeof(c) == DataVector{String}
+            if dfd.colindex.names[i] in vars
+                println("[",i,"]  : ",dfd.colindex.names[i])
+                #unique(dfd[i])
+                dfd[i] = pool(dfd[i])
             end
         end
+        #typeof(c) == DataVector{String} && println("[",i,"]  : ",dfd.colindex.names[i])
     end
 end
-#repool!(dfd,vcat([:group],cfg[:random_campaigns]))
 
+@everywhere  function genF(y::Symbol, iv::Array{Symbol},ranef::Array{Symbol}=Symbol[])  
+        vars=setdiff(iv,vcat([y],ranef))
+        f = string(y)*" ~ 1"
+        f = length(vars) > 0 ?  f * reduce(*, [ " + "*  string(c) for c in unique(vars) ] ) : f
+        f = length(ranef) > 0 ?  f * reduce(*, [ " + "*  "(1 | "*string(c)*")" for c in unique(ranef) ] )  : f
+        eval(parse(f))
+end
 
-
+@everywhere function coefDF(m::RegressionModel)
+    DataFrame(parameter=vcat([:intercept],m.mf.terms.terms)  #g.model.mm.assign
+             , coef=coef(m)
+             , stderr=stderr(m)
+             , zval=coef(m)./stderr(m) 
+             , pval= ccdf(FDist(1, dof_residual(m)), abs2(coef(m)./stderr(m))  )
+             )
+end
 
 
 # -------------------------------------
 
 
-
-
-@everywhere function runmodels(fname::String, m::Dict)
+@everywhere function runGlmm(mod_fname::String, jmod_fname::String, modelname::Symbol, ranef::Symbol=:empty)
     println("Loding data : ")
-    dfd = readtable(fname,header=true);
-    repool!(dfd,m[:raneff])
-    runmodels(dfd, m)
+    dfd = readtable(mod_fname,header=true);
+    modelsDict = readModels(jmod_fname)
+    poolit!(dfd,modelsDict[:factors])
+    m=modelsDict[modelname]
+    #ranef = ranef==[:empty] ? m[:raneff]  : ranef
+    if ranef==:empty
+        v_out=Dict()
+        for r in m[:raneff]
+            v_out[r] = runGlmm(dfd, m, [r])
+        end
+        return v_out
+    else
+        return runGlmm(dfd, m, [ranef])
+    end
 end
 
-@everywhere function runmodels(dfd::DataFrame, m::Dict)
-    function genFmula(y::Symbol, iv::Array{Symbol},ranef::Array{Symbol})  
-        vars=setdiff(iv,vcat([y],ranef))
+
+@everywhere function runGlmm(dfd::DataFrame,m::Dict, ranef::Array{Symbol}=[:empty])
+    function genFx(y::Symbol, iv::Array{Symbol},ranef::Array{Symbol})  
+        vars=setdiff(iv,vcat([y],ranef,[:group]))
+        eval(parse( string(y)*" ~ 1"* reduce(*, [ " + "*  string(c) for c in vars ] ) * reduce(*, [ " + "*  "(1 | "*string(c)*")" for c in ranef ] )  ) )
+    end   
+    ranef = ranef==[:empty] ? m[:raneff]  : ranef
+    m=expandM(m)
+    f=genFx(m[:y_var],m[:finalvars],ranef)
+    cols = convert(Array{Symbol},vcat(m[:finalvars], [m[:y_var], m[:logvar]], ranef ))
+    #runGlmm(dfd[ (dfd[:buyer_pos_p1].==1),:],expandM(iocc),[:creative] )
+    println("Ok - Running ",m[:modelName]," - ",ranef," Glmm on proc ",myid()," with : ",f)
+    if m[:Buyer_Pos_P1_is1]
+        return gmm1 = fit!(glmm(f, dfd[(dfd[:buyer_pos_p1].==1),cols] , m[:dist], m[:lnk]))
+    else
+        return gmm1 = fit!(glmm(f, dfd[cols], m[:dist], m[:lnk]))
+    end
+end
+
+
+@everywhere function genModelList(modelsDict::Dict)
+    #for (k,v) in OrderedDict(m=>modelsDict[m][:raneff] for m in [:ipen,:idolocc,:iocc]) for r in v println(k,"-",r) end end
+    q = Symbol[]
+    cnt=0
+    for (k,v) in OrderedDict(m=>modelsDict[m][:raneff] for m in [:ipen,:idolocc,:iocc]) 
+        for r in v push!(q,k); push!(q,r); cnt=cnt+1 end 
+    end
+    #x = reshape(q, (2,2))
+    x=reshape(q, (2,cnt))
+    #x'
+    permutedims(x, [2, 1])
+end
+
+
+
+# -----------------  CLUSTERED ---------------------------
+
+function genM(dfd::DataFrame, modelsDict::Dict, includeResiduals::Bool=false)   
+    function xResiduals(g::RegressionModel)
+        resp = g.model.rr 
+        sign(resp.y - resp.mu) .* sqrt(resp.devresid)
+    end
+    iocc = expandM(modelsDict[:iocc])
+    idolocc = expandM(modelsDict[:idolocc])
+    ipen = expandM(modelsDict[:ipen])
+        
+    glist = Dict()
+    f=genF(ipen[:y_var],ipen[:finalvars])
+    glist[:ipen] = glm(f, dfd[vcat(ipen[:y_var],ipen[:finalvars])], ipen[:dist], ipen[:lnk])
+    if includeResiduals
+        glist[:r_ipen] = DataFrame(panid=dfd[:panid], resids=xResiduals(glist[:ipen]))
+    end
+    
+    dfd=dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:]
+    f=genF(iocc[:y_var],iocc[:finalvars])
+    glist[:iocc] = glm(f, dfd[vcat(iocc[:y_var],iocc[:finalvars])], iocc[:dist], iocc[:lnk])
+    if includeResiduals
+        glist[:r_iocc] = DataFrame(panid=dfd[:panid], resids=xResiduals(glist[:iocc]))
+    end    
+    
+    f=genF(idolocc[:y_var],idolocc[:finalvars])
+    glist[:idolocc] = glm(f, dfd[vcat(idolocc[:y_var],idolocc[:finalvars])], idolocc[:dist], idolocc[:lnk])
+    if includeResiduals
+        glist[:r_idolocc] = DataFrame(panid=dfd[:panid], resids=xResiduals(glist[:idolocc]))
+    end
+    return glist
+end    
+    
+    
+   
+function ranefMe(m::GeneralizedLinearMixedModel)
+    DataFrame(parameter=levels(m.LMM.trms[1].f), coef=vec(ranef(m, named=true)'[1]), stderr=vec(condVar(m)[1]) )
+end
+
+function getranef(m::Dict)
+    xdf = DataFrame(level=String[], ranef = Float64[], stderr = Float64[], name = Symbol[] )
+    for (key,value) in m
+        println(key)
+        rdf = ranefMe(value)
+        rdf[:name] = key
+        xdf = vcat(xdf,rdf)
+    end
+    return xdf
+end
+    
+
+function processReady(shelf::OrderedDict) 
+    for (k,v) in  filter((k,v)-> (v[:status]==:running)&(isready(v[:channel])==true) ,shelf)
+        v[:results] = take!(v[:channel])   #fetch(v[:channel])
+        v[:status] = :complete
+        v[:worker] = 0
+        println("Task Completed : ",v[:model]," ~ ",v[:renef])
+        close(v[:channel])
+    end
+end
+    
+    
+runningW(shelf::OrderedDict) = filter((k,v)-> v[:status]==:running ,shelf) 
+hasRunning(shelf::OrderedDict) = length(runningW(shelf)) > 0 ? true : false 
+readyW(shelf::OrderedDict) = filter((k,v)-> v[:status]==:ready ,shelf) 
+hasReady(shelf::OrderedDict) = length(readyW(shelf)) > 0 ? true : false     
+NotcompleteW(shelf::OrderedDict) = filter((k,v)-> v[:status]!=:complete ,shelf) 
+isCompleteW(shelf::OrderedDict) = length(NotcompleteW(shelf)) == 0 ? true : false    
+
+function runclusteredModels(shelf::OrderedDict)
+     wids = workers()    
+     for v in values(shelf)  v[:status]=:ready; v[:worker]=0; v[:channel]=Channel(1) end 
+     freeW() = setdiff(wids,[v[:worker] for (k,v) in filter((k,v)-> v[:status]==:running ,shelf)]) 
+     hasfreeW() = length(freeW()) > 0 ? true : false
+     nextFreeW() = length(freeW()) > 0 ? freeW()[1]   : NA
+        
+     function runTask(mkey::Symbol)
+        wid = nextFreeW() 
+        if isna(wid)
+            return false
+        else
+            w = shelf[mkey]
+            w[:status] = :running
+            w[:worker] = wid
+            @async put!(w[:channel], remotecall_fetch(runGlmm, wid, mod_fname, jmod_fname, w[:model], w[:renef] )) 
+            return true
+        end
+     end
+
+     waitforFreeWorker() = while !hasfreeW() println("waiting"); processReady(shelf); sleep(15) end
+     @async for (k,v) in shelf
+         waitforFreeWorker()
+         println("running : ",k)
+         runTask(k)
+     end
+
+end
+        
+    
+
+#/mnt/resource/analytics/rev7
+    #(length(workers())==1)&(workers()[1]==1)
+modelsDict = readModels(jmod_fname)       
+ml = genModelList(modelsDict)
+shelf = OrderedDict(Symbol(string(ml[i,:][1])*"_"*string(ml[i,:][2]))=> Dict{Symbol,Any}( :model=>ml[i,:][1],:renef=>ml[i,:][2]) for i in 1:length(ml[:,1]))    
+runclusteredModels(shelf)
+while !isCompleteW(shelf) println("Not Complete yet!"); sleep(5); if !hasReady(shelf) processReady(shelf) end end
+shelf        
+for (k,v) in shelf
+    v[:sdf]= ranefMe(v[:results])
+    v[:sdf][:model] = v[:model]
+    v[:sdf][:ranef] = v[:renef]
+end        
+rdf = vcat([v[:sdf]for v in values(shelf)])
+        rdf[:zval] = NA
+        rdf[:pval] = NA
+        rdf[:modelType] = "MixedModels"
+# rdf[(rdf[:model].==:ipen)&(rdf[:break].==:placement),:]
+writetable(root*"/raneff_out_df.csv", rdf)       
+        
+
+     dfd = readtable(mod_fname,header=true);
+     glist = genM(dfd, modelsDict)
+     go_pen=coefDF(glist[:ipen])
+     go_dolocc=coefDF(glist[:idolocc])
+     go_occ=coefDF(glist[:iocc])
+     go_occ[:model] = "occ"
+     go_dolocc[:model] = "dolocc"
+     go_pen[:model] = "pen"
+     xgo = vcat(go_occ,go_dolocc,go_pen)
+     xgo[:ranef] = NA
+        xgo[:modelType] = "Glm"
+     writetable(root*"/glm_out_df.csv", xgo)
+
+        campaign = vcat(rdf,xgo)
+        
+        
+        
+        
+        
+        
+        
+        
+   
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+# --------------- SEQUENTIALLY -----------------
+    
+
+
+function genM(dfd::DataFrame, iocc::Dict,idolocc::Dict,ipen::Dict, includeResiduals::Bool=false)   
+    function xResiduals(g::RegressionModel)
+        resp = g.model.rr 
+        sign(resp.y - resp.mu) .* sqrt(resp.devresid)
+    end
+    glist = Dict()
+    f=genF(ipen[:y_var],ipen[:finalvars])
+    glist[:ipen] = glm(f, dfd[vcat(ipen[:y_var],ipen[:finalvars])], ipen[:dist], ipen[:lnk])
+    if includeResiduals
+        glist[:r_ipen] = DataFrame(panid=dfd[:panid], resids=xResiduals(glist[:ipen]))
+    end
+    
+    dfd=dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:]
+    f=genF(iocc[:y_var],iocc[:finalvars])
+    glist[:iocc] = glm(f, dfd[vcat(iocc[:y_var],iocc[:finalvars])], iocc[:dist], iocc[:lnk])
+    if includeResiduals
+        glist[:r_iocc] = DataFrame(panid=dfd[:panid], resids=xResiduals(glist[:iocc]))
+    end    
+    
+    f=genF(idolocc[:y_var],idolocc[:finalvars])
+    glist[:idolocc] = glm(f, dfd[vcat(idolocc[:y_var],idolocc[:finalvars])], idolocc[:dist], idolocc[:lnk])
+    if includeResiduals
+        glist[:r_idolocc] = DataFrame(panid=dfd[:panid], resids=xResiduals(glist[:idolocc]))
+    end
+    return glist
+end
+    
+    
+function ranefMe(m::GeneralizedLinearMixedModel)
+    DataFrame(level=levels(m.LMM.trms[1].f), ranef=vec(ranef(m, named=true)'[1]), stderr=vec(condVar(m)[1]) )
+end
+
+function getranef(m::Dict)
+    xdf = DataFrame(level=String[], ranef = Float64[], stderr = Float64[], name = Symbol[] )
+    for (key,value) in m
+        println(key)
+        rdf = ranefMe(value)
+        rdf[:name] = key
+        xdf = vcat(xdf,rdf)
+    end
+    return xdf
+end
+    
+    
+function runSequentialModels(modelsDict::Dict)
+    mocc=Dict()
+    for r in modelsDict[:iocc][:raneff]
+        mocc[r] = runGlmm( mod_fname,jmod_fname, :iocc, r)
+    end
+    mdolocc=Dict()
+    for r in modelsDict[:idolocc][:raneff]
+       mdolocc[r] = runGlmm( mod_fname,jmod_fname, :idolocc, r)
+    end
+    mpen=Dict()
+    for r in modelsDict[:ipen][:raneff]
+        mpen[r] = runGlmm( mod_fname,jmod_fname, :ipen, r)
+    end
+
+    o_occ = getranef(mocc)
+    o_dolocc = getranef(mdolocc)
+    o_pen = getranef(mpen)
+    o_occ[:model] = "occ"
+    o_dolocc[:model] = "dolocc"
+    o_pen[:model] = "pen"
+    rdf = vcat(o_occ, o_dolocc, o_pen)
+    writetable(root*"/raneff_out_df.csv", rdf)
+
+    modelsDict = readModels(jmod_fname)
+    dfd = readtable(mod_fname,header=true);
+    dfd[:iso]=false
+    iocc = modelsDict[:iocc]
+    idolocc = modelsDict[:idolocc]
+    ipen = modelsDict[:ipen]
+
+     glist = genM(dfd,expandM(iocc),expandM(idolocc),expandM(ipen)) 
+     go_pen=coefDF(glist[:ipen])
+     go_dolocc=coefDF(glist[:idolocc])
+     go_occ=coefDF(glist[:iocc])
+     go_occ[:model] = "occ"
+     go_dolocc[:model] = "dolocc"
+     go_pen[:model] = "pen"
+     xgo = vcat(go_occ,go_dolocc,go_pen)
+     writetable(root*"/glm_out_df.csv", xgo)        
+        
+     return  xgo, rdf
+end
+
+modelsDict = readModels(jmod_fname)
+runSequentialModels(modelsDict)    
+
+
+
+
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+# --------------------------------------------------------------------    
+        
+ml = genModelList(modelsDict)
+shelf = OrderedDict(Symbol(string(ml[i,:][1])*"_"*string(ml[i,:][2]))=> 
+        Dict(:model=>ml[i,:][1],:renef=>ml[i,:][2],:status=>:ready, :worker=>0, :channel=>Channel(1)) for i in 1:length(ml[:,1]))
+(length(workers())==1)&(workers()[1]==1)        
+        
+
+
+    
+mout=Dict()
+p=1
+for r in modelsDict[:ipen][:raneff]
+   p=p+1    
+   mout[r] = Channel(1)
+   @async put!(mout[r], remotecall_fetch(runGlmm,p, mod_fname, jmod_fname, :ipen, r))
+end
+[isready(mout[k]) for k in keys(mout)]
+#  for in in 1:100000  println([isready(mout[k]) for k in keys(mout)]); println(now()); sleep(15) end
+isready(c)    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+# ---------- NEW ---------------
+#http://docs.julialang.org/en/release-0.5/stdlib/parallel/#Base.Future
+#c = Channel(1)
+#@async put!(c, remotecall_fetch(long_computation, p))
+#isready(c)
+
+shelf=Dict()
+p=1
+for r in modelsDict[:ipen][:raneff]
+   p=p+1    
+   shelf[r] = Channel(1)
+   @async put!(shelf[r], remotecall_fetch(runGlmm,p, mod_fname, jmod_fname, :ipen, r))
+end
+[isready(shelf[k]) for k in keys(shelf)]
+#  for in in 1:100000  println([isready(shelf[k]) for k in keys(shelf)]); println(now()); sleep(15) end
+isready(c)
+
+
+mpen=Dict()
+p=1
+for r in modelsDict[:ipen][:raneff]
+   p=p+1
+   @async mpen[r] = remotecall_fetch( runGlmm,p, mod_fname, jmod_fname, :ipen, r )
+end
+#@async xdocc[:publisher_fct] = remotecall_fetch( runGlmm,2, mod_fname, jmod_fname, :idolocc, :publisher1 )
+
+
+#per Raneff
+#@time mocc = runGlmm( mod_fname,jmod_fname, :iocc, :publisher1)
+
+#@time mocc = runGlmm( mod_fname,jmod_fname, :iocc)
+#@time mdolocc = runGlmm( mod_fname,jmod_fname, :idolocc)
+#@time mpen = runGlmm( mod_fname,jmod_fname, :ipen)
+
+
+
+"""
+@everywhere function runmodels(mod_fname::String, jmod_fname::String, modelname::Symbol, rf::Symbol=:empty )
+    println("Loding data : ")
+    dfd = readtable(mod_fname,header=true);
+    modelsDict = readModels(jmod_fname)
+    m=expandM(modelsDict[modelname])
+    #repool!(dfd,m[:raneff])
+    poolit!(dfd,modelsDict[:factors])
+    runmodels(dfd, m, rf ) 
+end
+
+
+@everywhere function runmodels(dfd::DataFrame, m::Dict, rf::Symbol=:empty)
+    function genFx(y::Symbol, iv::Array{Symbol},ranef::Array{Symbol})  
+        vars=setdiff(iv,vcat([y],ranef,[:group]))
         eval(parse( string(y)*" ~ 1"* reduce(*, [ " + "*  string(c) for c in vars ] ) * reduce(*, [ " + "*  "(1 | "*string(c)*")" for c in ranef ] )  ) )
     end
     v_out = OrderedDict()
     println("start glmm on : ",myid())
-    for r in m[:raneff]
-        f=genFmula(m[:y_var],m[:finalvars],[r])
+    if rf==:empty
+        rarr = m[:raneff]
+    else
+        rarr = [rf]
+    end
+    for r in rarr
+        f=genFx(m[:y_var],m[:finalvars],[r])
         println(f)
         if m[:Buyer_Pos_P1_is1]
             gdfd = dfd[ (dfd[:buyer_pos_p1].==1) ,convert(Array{Symbol},vcat(m[:finalvars], [m[:y_var], m[:logvar]],m[:raneff]  ))]
@@ -826,25 +1271,198 @@ end
         end
         println("O.K. running glmm!! : ",names(gdfd))
         gmm1 = fit!(glmm(f, gdfd , m[:dist]  ,m[:lnk])  )
+        
         v_out[r] = gmm1
     end
     #gout = runGlmm(fdfd, raneff, m)        
     #put!(ques[Symbol(m.modelName)],v_out)
-    return v_out
+    if length(v_out) == 1
+        return v_out[[key for key in keys(v_out)][1]]
+    else
+        return v_out
+    end
     println("ending runGLMM!!!")
 end
 
 
 # --- TEST ----
-modDict = readModels(jmod_fname)
-#take!(ques[:dolocc]); runmodels( ffname, cfg[:random_campaigns] ,mdolocc,ques)
-#x = runmodels( dfd, cfg[:random_campaigns] ,mdolocc)
-#y = runmodels( mod_fname, cfg[:random_campaigns] ,mdolocc)
-runmodels( mod_fname,modDict[:mocc])
+@time mocc = runmodels( mod_fname,jmod_fname, :iocc)
+@time mdolocc = runmodels( mod_fname,jmod_fname, :idolocc)
+@time mpen = runmodels( mod_fname,jmod_fname, :ipen)
+"""
+
+
+function ranefMe(m::GeneralizedLinearMixedModel)
+    DataFrame(level=levels(m.LMM.trms[1].f), ranef=vec(ranef(m, named=true)'[1]), stderr=vec(condVar(m)[1]) )
+end
+
+function getranef(m::OrderedDict)
+    xdf = DataFrame(level=String[], ranef = Float64[], stderr = Float64[], name = Symbol[] )
+    for (key,value) in m
+        println(key)
+        rdf = ranefMe(value)
+        rdf[:name] = key
+        xdf = vcat(xdf,rdf)
+    end
+    return xdf
+end
+
+o_occ = getranef(mocc)
+o_dolocc = getranef(mdolocc)
+o_pen = getranef(mpen)
+o_occ[:model] = "occ"
+o_dolocc[:model] = "dolocc"
+o_pen[:model] = "pen"
+rdf = vcat(o_occ, o_dolocc, o_pen)
+writetable(root*"/raneff_out_df.csv", rdf)
+
+
+modelsDict = readModels(jmod_fname)
+dfd = readtable(mod_fname,header=true);
+dfd[:iso]=false
+iocc = modelsDict[:iocc]
+idolocc = modelsDict[:idolocc]
+ipen = modelsDict[:ipen]
+#rlist, glist = genlists(dfd,iocc,idolocc,ipen)
+
+
+#function genGLM(dfd::DataFrame, m::Dict)
+#    f=genF(m[:y_var],m[:finalvars])
+#    g = glm(f, dfd[vcat(m[:y_var],m[:finalvars])], m[:dist], m[:lnk])
+#    return g 
+#end
+
+
+function genM(dfd::DataFrame, iocc::Dict,idolocc::Dict,ipen::Dict, includeResiduals::Bool=false)   
+    function xResiduals(g::RegressionModel)
+        resp = g.model.rr 
+        sign(resp.y - resp.mu) .* sqrt(resp.devresid)
+    end
+    glist = Dict()
+    f=genF(ipen[:y_var],ipen[:finalvars])
+    glist[:ipen] = glm(f, dfd[vcat(ipen[:y_var],ipen[:finalvars])], ipen[:dist], ipen[:lnk])
+    if includeResiduals
+        glist[:r_ipen] = DataFrame(panid=dfd[:panid], resids=xResiduals(glist[:ipen]))
+    end
+    
+    dfd=dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:]
+    f=genF(iocc[:y_var],iocc[:finalvars])
+    glist[:iocc] = glm(f, dfd[vcat(iocc[:y_var],iocc[:finalvars])], iocc[:dist], iocc[:lnk])
+    if includeResiduals
+        glist[:r_iocc] = DataFrame(panid=dfd[:panid], resids=xResiduals(glist[:iocc]))
+    end    
+    
+    f=genF(idolocc[:y_var],idolocc[:finalvars])
+    glist[:idolocc] = glm(f, dfd[vcat(idolocc[:y_var],idolocc[:finalvars])], idolocc[:dist], idolocc[:lnk])
+    if includeResiduals
+        glist[:r_idolocc] = DataFrame(panid=dfd[:panid], resids=xResiduals(glist[:idolocc]))
+    end
+    
+    #f=genF(m[:y_var],m[:finalvars]); 
+    #glist[] = glm(f, dfd[vcat(m[:y_var],m[:finalvars])], m[:dist], m[:lnk])
+    
+    
+    #for m in [expandM(iocc),expandM(idolocc),expandM(ipen)]
+    #    f=genF(m[:y_var],m[:finalvars])
+    #    if m[:Buyer_Pos_P1_is1]
+    #        dfd = dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:]
+    #    else
+    #        dfd = dfd[(dfd[:iso].==false),:]
+    #    end
+    #    g = glm(f, dfd[vcat(m[:y_var],m[:finalvars])], m[:dist], m[:lnk])
+    #    #r = DataFrame(panid=dfd[:panid], resids=xResiduals(g))
+    #    glist[m[:modelName]] = g
+    #end
+    return glist
+end
+glist = genM(dfd,expandM(iocc),expandM(idolocc),expandM(ipen)) 
+
+
+go_pen=coefDF(glist[:ipen])
+go_dolocc=coefDF(glist[:idolocc])
+go_occ=coefDF(glist[:iocc])
+go_occ[:model] = "occ"
+go_dolocc[:model] = "dolocc"
+go_pen[:model] = "pen"
+xgo = vcat(go_occ,go_dolocc,go_pen)
+#writetable(root*"/raneff_out_df.csv", dx)
+writetable(root*"/glm_out_df.csv", xgo)
+
+
+#mocc = runmodels( mod_fname,modelsDict, :iocc)
+#runmodels( mod_fname,modelsDict, :iocc)
+#runmodels( mod_fname,modelsDict, :iocc)
+
+docc = Dict()
+#@async d[:iocc] = remotecall_fetch( runmodels,2, mod_fname, modelsDict, :iocc )
+@async docc[:publisher_fct] = remotecall_fetch( runmodels,2, mod_fname, jmod_fname, :iocc, :publisher_fct )
+#= runmodels( mod_fname,modelsDict, :iocc, :publisher_fct)
+
+"""
+
+begin
+    d = Dict()
+    @sync @async for (idx, pid) in enumerate(workers())
+         d[idx] = remotecall_fetch(getipaddr,pid)
+    end
+end
+
+
+
+begin
+    a = cell(nworkers())
+    @sync @async for (idx, pid) in enumerate(workers())
+        a[idx] = remotecall_fetch(pid, sleep, 2)
+    end
+end
+
+"""
 
 
 
 
+
+
+
+
+
+function gethostworkers()
+    d = Dict()
+    @sync @async for (idx, pid) in enumerate(workers())
+        d[idx] = remotecall_fetch(getipaddr,pid)
+    end
+    iout=Dict()
+    for ip in [string(ip) for ip in unique(values(d))]
+        a=Int64[]
+        for (key, value) in d
+            if string(value) == ip
+                push!(a,key)
+            end
+        end    
+        iout[ip] = sort(a)
+    end
+    return iout
+end
+
+
+
+
+# =====================================================================================================================================
+# =====================================================================================================================================
+# ---- MODELINg END ------
+# =====================================================================================================================================
+# =====================================================================================================================================
+#ssh-keygen -t rsa
+#cat .ssh/id_rsa.pub | ssh b@B 'cat >> .ssh/authorized_keys'
+#chmod 700 .ssh
+#chmod 640 .ssh/authorized_keys
+# addprocs(["user@host"], tunnel=true, dir="~/julia-79599ada44/bin/")
+# addprocs(["iriadmin@10.63.36.22"])
+# addprocs(["iriadmin@10.63.36.23"])
+# addprocs([("host1", :auto), ("host2", 5), "host3"]) will launch as many workers as cores on host1, 5 workers on host2 and a single worker on host3.
+# addprocs([("iriadmin@10.63.36.22", :auto), ("iriadmin@10.63.36.23", 5)])
+# addprocs([("iriadmin@10.63.36.22", :auto), ("iriadmin@10.63.36.23", :auto)])
+#r = @spawnat 2 ENV
 
 a=modDict[:mpen]
 f=genFmula(a[:y_var], vcat(a[:finalvars],[:group]), a[:logvar])
@@ -981,3 +1599,812 @@ gmm1 = fit!(glmm(trps_pos_p1 ~ 1 + prd_1_qty_pre + cpn_un_pre_p4 + (1 | publishe
 # ------------------------------------------------------------------------------------------------------------
 
 
+
+
+
+
+
+type xGLM
+    vfactors::Vector{Symbol}
+    fmula::DataFrames.Formula
+    xvars::Vector{Symbol}   
+    model::Any #DataFrameRegressionModel
+    sdf::DataFrame
+    wasSuccessful::Bool
+    resids::DataFrame
+ 
+    function xGLM(dfd::DataFrame, dist::Distribution, y_var::Symbol, logvar::Symbol , lnk::Link , vfactors::Array{Symbol} )  
+        this=new()
+        this.wasSuccessful=false
+        this.xvars=Symbol[]
+        this.vfactors=setdiff(vfactors, [y_var,logvar])
+        for l in 1:30
+            this.fmula = genFmula(y_var, this.vfactors, logvar  )
+            try
+                f=this.fmula
+                this.model = glm(f,  dfd[convert(Array{Symbol},vcat(f.lhs,f.rhs.args[3:end]))]  , dist, lnk )
+                
+                this.resids = DataFrame(panid=dfd[:panid], resids=xResiduals(this.model))
+                println("starting GLM")
+                this.sdf = DataFrame(vars=vcat([:intercept],this.model.mf.terms.terms)  #g.model.mm.assign
+                                     , coef=coef(this.model)
+                                     , se=stderr(this.model)
+                                     , zval=coef(this.model)./stderr(this.model) 
+                                     ,pval= ccdf(FDist(1, dof_residual(this.model)), abs2(coef(this.model)./stderr(this.model))))   
+                """
+                g=mocc.glm1_pvals.model
+                g.model.mm.assign
+                g=m.glm1_pvals
+                DataFrame(vars=vcat([:intercept],g.model.mf.terms.terms)
+                          , coef=coef(g.model)
+                          , se=stderr(g.model)
+                          , zval=coef(g.model)./stderr(g.model) 
+                          ,pval= ccdf(FDist(1, dof_residual(g.model)), abs2(coef(g.model)./stderr(g.model))))  
+                
+                
+                featureSelection(  dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:]  , mdolocc)
+                g=mdolocc.glm1_pvals.model
+                vfactors=vars
+                vfactors=setdiff(vfactors, [m.y_var,m.logvar])
+                f = genFmula(m.y_var, vfactors, m.logvar  )
+                g = glm(f,  dfd[convert(Array{Symbol},vcat(f.lhs,f.rhs.args[3:end]))]  , m.dist, m.lnk )
+                
+                DataFrame(vars=vcat([:intercept],g.mf.terms.terms)
+                          , coef=coef(g)
+                          , se=stderr(g)
+                          , zval=coef(g)./stderr(g) 
+                          , pval= ccdf(FDist(1, dof_residual(g)), abs2(coef(g)./stderr(g))  )
+                         )  
+                
+                
+                
+                """
+                this.wasSuccessful=true
+                break
+            catch e
+                if isa(e, Base.LinAlg.PosDefException)
+                    v=this.vfactors[e.info-1]
+                    push!(this.xvars,v)
+                    println("!!! Multicollinearity, removing :",v,"~~~",e.info-1, "\n~~~",e)
+                else
+                    println("....",e)
+                    break
+                end
+            end
+        end
+        return this 
+    end
+end
+ 
+
+
+
+
+
+#function m2dict(m::MModel,raneff::Array{Symbol}, vars::Array{Symbol}=Symbol[] )
+#    if length(vars)==0 vars=m.finalvars end
+#    return Dict(:modelName=>m.modelName ,:raneff=>cfg[:random_campaigns], :y_var=>m.y_var, :logvar=>m.logvar, :finalvars=>vars )
+#end
+##m2dict(mocc,cfg[:random_campaigns])
+#function m2Dict(mocc::MModel, mdolocc::MModel, mpen::MModel, raneff::Array{Symbol} )
+#    return Dict(:mocc=>m2dict(mocc, raneff ),:mdolocc=>m2dict(mdolocc,raneff), :mpen=>m2dict(mpen,raneff))
+#end
+## m2dict(mocc,mdolocc,mpen  cfg[:random_campaigns] )
+
+
+
+#iocc = Dict(:modelName=>"occ", :raneff=>cfg[:random_campaigns], :y_var=>cfg[:occ_y_var], :logvar=>cfg[:occ_logvar] )
+#idocc = Dict(:modelName=>"dolocc", :raneff=>cfg[:random_campaigns], :y_var=>cfg[:dolocc_y_var], :logvar=>cfg[:dolocc_logvar] )
+#ipen = Dict(:modelName=>"pen", :raneff=>cfg[:random_campaigns], :y_var=>cfg[:pen_y_var], :logvar=>cfg[:pen_logvar] )
+
+
+
+
+
+
+
+
+function featureSelection(dfd::DataFrame, m::MModel)
+    function rmVars(v::Array{Symbol})
+        v=setdiff(v,[:group])
+        return setdiff(vars,v)  
+    end        
+    
+    custom_vars=[:dolocc_reduction,:occ_reduction,:pen_reduction,:data_b_e_nb,:data_nb_ne_b,:whyo,:iso]
+    required_vars=vcat([m.y_var,:panid,m.logvar],cfg[:random_demos],cfg[:random_campaigns],cfg[:scoring_vars])
+    vars=setdiff(vcat(m.vars,[m.logvar_colname]),vcat(required_vars,custom_vars))
+    
+    println(uppercase(mocc.modelName)*" : SingleValue") #SingleValue
+    m.removed_SingleLevelVars=FS_singleLevel(dfd,vars)
+    vars = rmVars(m.removed_SingleLevelVars)
+    
+    println(uppercase(mocc.modelName)*" : Singularity : "*string(genFmula(m.y_var,vars,m.logvar))) # Singularity
+    m.singularity_x = checksingularity(genFmula(m.y_var,vars,m.logvar), dfd)
+    vars = rmVars(m.singularity_x)
+    
+    println(uppercase(mocc.modelName)*" : PVals") #PVals
+    m.glm1_pvals = iGLM(dfd, m.dist, m.y_var, m.logvar, m.lnk , vars  )  
+    g1=m.glm1_pvals
+    m.glm1_pvals_x=g1.sdf[g1.sdf[:pval].>0.7,:vars]
+    vars = rmVars(m.glm1_pvals_x)
+    
+    println(uppercase(mocc.modelName)*" : Z & Vif") #Z & Vif
+    m.glm2_ZnVIF = iGLM(dfd, m.dist, m.y_var, m.logvar, m.lnk ,vars  ) 
+    g2=m.glm2_ZnVIF
+    vif!(g2)
+    z = g2.sdf[abs(g2.sdf[:zval]).<1.96,:vars]
+    v = g2.sdf[ !DataArrays.isna(g2.sdf[:vif])&(g2.sdf[:vif].>15),:vars]
+    m.glm2_ZnVIF_x =intersect(z,v)
+    vars = rmVars(m.glm2_ZnVIF_x )
+
+
+    function chkSigns(m::MModel, vars::Array{Symbol}, dfd::DataFrame, cfg::OrderedDict)  # Pvalue & Signs
+        vars=unique(vcat(vars,[:group]))
+        g = iGLM(dfd, m.dist, m.y_var, m.logvar, m.lnk , vars  )  
+        neutralvars = setdiff(vars,vcat(cfg[:negativevars],cfg[:positivevars])) 
+        neg=intersect(cfg[:negativevars],g.sdf[g.sdf[:coef].<0,:vars])
+        pos=intersect(cfg[:positivevars],g.sdf[g.sdf[:coef].>0,:vars])
+        varstokeep = intersect(vcat(neutralvars, pos,neg) ,  g.sdf[ g.sdf[:pval].<cfg[:pvalue_lvl] ,:vars] )
+        return g, varstokeep
+    end
+
+    println(uppercase(mocc.modelName)*" : SIGN Check 1") 
+    (m.glm3_PnSigns, initialvars) = chkSigns(m, vars, dfd, cfg)
+    println(uppercase(mocc.modelName)*" : SIGN Check 2") 
+    (m.glm4_PnSignsClean, vars_2) = chkSigns(m, convert(Array{Symbol},initialvars) , dfd, cfg)
+
+
+    function getCorrVars(dfd::DataFrame, vars_2::Array{Symbol})
+        rm_lst=Symbol[]
+        if (length(vars_2) > 1) & (   length(getColswithType("num", dfd, convert(Array{Symbol},vars_2) ) ) > 1  )
+            stackdf = corDFD(dfd,vars_2)
+            stackdf[:variable_pval] = [ m.glm4_PnSignsClean.sdf[m.glm4_PnSignsClean.sdf[:vars].==c,:pval][1]   for c in stackdf[:variable]]
+            stackdf[:vars_pval] = [ m.glm4_PnSignsClean.sdf[m.glm4_PnSignsClean.sdf[:vars].==c,:pval][1]   for c in stackdf[:vars]] 
+            stackdf[:most_Sig] = map((x,y) -> x < y ? "variable" : "vars" ,stackdf[:variable_pval],stackdf[:vars_pval])
+     
+            for row in eachrow(stackdf[(stackdf[:value].> 0.8) | (stackdf[:value].<-0.8),:])
+                if row[:vars] == "group"
+                    push!(rm_lst,row[:variable])
+                elseif row[:variable] == "group"
+                    push!(rm_lst,row[:vars])
+                else
+                    row[:most_Sig] == "variable" ? push!(rm_lst,row[:vars]) : push!(rm_lst,row[:variable])
+                end
+            end    
+        end
+        return rm_lst
+    end
+    
+    println(uppercase(mocc.modelName)*" : Correlation") 
+    m.corrvars_x = getCorrVars(dfd,convert(Array{Symbol},setdiff(vars_2,factor_cols)))
+    vars_2 = setdiff(vars_2,m.corrvars_x)
+    
+    (m.glm5, m.finalvars) =  chkSigns(m, convert(Array{Symbol},vars_2), dfd, cfg)
+    
+    println(uppercase(mocc.modelName)*" : Final Review") # Final Review:
+    m.glm6_final = iGLM(dfd, m.dist, m.y_var, m.logvar, m.lnk , convert(Array{Symbol},vcat(m.finalvars,[:group]))  )
+    #rename!(m.glm6_final.resids,:resids,Symbol(m.modelName*"_residual"))
+    m.df_resid = m.glm6_final.resids
+    return m.glm6_final
+end
+
+
+
+
+
+
+
+
+type MDolOcc <: MModel
+    vars::Vector{Symbol}
+    #finalvars::Vector{Symbol}
+    #y_var::Symbol
+    #dist::Distribution
+    #lnk::Link
+    exclude_vars::Vector{Symbol}
+    removed_SingleLevelVars::Vector{Symbol}
+    singularity_x::Vector{Symbol}
+    glm1_pvals::iGLM
+    glm1_pvals_x::Vector{Symbol}
+    glm2_ZnVIF::iGLM
+    glm2_ZnVIF_x::Vector{Symbol}
+    glm3_PnSigns::iGLM
+    glm3_PnSigns_x::Vector{Symbol}
+    glm4_PnSignsClean::iGLM
+    glm4_PnSignsClean_x::Vector{Symbol}
+    glm5::iGLM
+    glm5_Z_x::Vector{Symbol}
+    corrvars_x::Vector{Symbol}
+    glm6_final::iGLM
+    Buyer_Pos_P1_is1::Bool
+    modelName::String
+    #logvar::Symbol
+    #logvar_colname::Symbol
+    #fdf::DataFrame
+    #rdf::DataFrame
+    #df_resid::DataFrame
+    #groupDeviance::Float64
+    function MDolOcc(dfd::DataFrame,cfg::OrderedDict=Dict()) 
+        this=new(); this.modelName=:dolocc; 
+        #this.logvar=cfg[:dolocc_logvar]; this.y_var=cfg[:dolocc_y_var]; this.dist=Gamma(); this.logvar_colname = cfg[:dolocc_logvar_colname]; this.lnk=LogLink()
+        this.removed_SingleLevelVars=Symbol[]
+        this.glm1_pvals_x=Symbol[]
+        this.glm2_ZnVIF_x=Symbol[]
+        this.glm3_PnSigns_x=Symbol[]
+        this.glm4_PnSignsClean_x=Symbol[]
+        this.corrvars_x=Symbol[]
+        this.exclude_vars= Symbol[ cfg[:occ_y_var],cfg[:occ_logvar],cfg[:occ_logvar_colname],cfg[:pen_y_var],cfg[:pen_logvar],cfg[:pen_logvar_colname], :buyer_pos_p1 ]
+        this.Buyer_Pos_P1_is1=true
+        #dfd[this.logvar_colname] = log(Array(dfd[this.logvar]+1))
+        this.vars=setdiff(names(dfd),vcat(this.exclude_vars,  [:iso,:whyo,:data_nb_ne_b, :data_b_e_nb ,:pen_reduction,:occ_reduction,:dolocc_reduction] ))
+        this.vars=setdiff(this.vars,[this.logvar, this.logvar_colname])
+        return this 
+    end
+end
+mdolocc = MDolOcc(dfd,cfg)
+
+
+
+
+
+type MOcc <: MModel
+    vars::Vector{Symbol}
+    #finalvars::Vector{Symbol}
+    #y_var::Symbol
+    #dist::Distribution
+    #lnk::Link
+    exclude_vars::Vector{Symbol}
+    singularity_x::Vector{Symbol}
+    removed_SingleLevelVars::Vector{Symbol}
+    glm1_pvals::iGLM
+    glm1_pvals_x::Vector{Symbol}
+    glm2_ZnVIF::iGLM
+    glm2_ZnVIF_x::Vector{Symbol}
+    glm3_PnSigns::iGLM
+    glm3_PnSigns_x::Vector{Symbol}
+    glm4_PnSignsClean::iGLM
+    glm4_PnSignsClean_x::Vector{Symbol}
+    glm5::iGLM
+    glm5_Z_x::Vector{Symbol}
+    corrvars_x::Vector{Symbol}
+    glm6_final::iGLM
+    Buyer_Pos_P1_is1::Bool
+    modelName::String
+    #logvar::Symbol
+    #logvar_colname::Symbol
+    #fdf::DataFrame
+    #rdf::DataFrame
+    #df_resid::DataFrame
+    #groupDeviance::Float64
+    function MOcc(dfd::DataFrame,cfg::OrderedDict=Dict()) 
+        this=new(); this.modelName=:occ; 
+        #this.logvar=cfg[:occ_logvar]; this.y_var=cfg[:occ_y_var]; this.dist=Poisson(); this.logvar_colname = cfg[:occ_logvar_colname]; this.lnk=LogLink()
+        this.removed_SingleLevelVars=Symbol[]
+        this.glm1_pvals_x=Symbol[]
+        this.glm2_ZnVIF_x=Symbol[]
+        this.glm3_PnSigns_x=Symbol[]
+        this.glm4_PnSignsClean_x=Symbol[]
+        this.corrvars_x=Symbol[]
+        this.exclude_vars=Symbol[cfg[:dolocc_y_var],cfg[:dolocc_logvar],cfg[:dolocc_logvar_colname],cfg[:pen_y_var],cfg[:pen_logvar],cfg[:pen_logvar_colname], :buyer_pos_p1 ]
+        this.Buyer_Pos_P1_is1=true
+        #dfd[this.logvar_colname] = log(Array(dfd[this.logvar]+1))
+        this.vars=setdiff(names(dfd),vcat(this.exclude_vars,[:iso,:whyo,:data_nb_ne_b, :data_b_e_nb ,:pen_reduction,:occ_reduction,:dolocc_reduction]))
+        this.vars=setdiff(this.vars,[this.logvar, this.logvar_colname])
+        return this 
+    end
+end
+mocc = MOcc(dfd,cfg)
+
+
+
+type MPen <: MModel
+    vars::Vector{Symbol}
+    #finalvars::Vector{Symbol}
+    #y_var::Symbol
+    #dist::Distribution
+    #lnk::Link
+    exclude_vars::Vector{Symbol}
+    singularity_x::Vector{Symbol}
+    removed_SingleLevelVars::Vector{Symbol}
+    glm1_pvals::iGLM
+    glm1_pvals_x::Vector{Symbol}
+    glm2_ZnVIF::iGLM
+    glm2_ZnVIF_x::Vector{Symbol}
+    glm3_PnSigns::iGLM
+    glm3_PnSigns_x::Vector{Symbol}
+    glm4_PnSignsClean::iGLM
+    glm4_PnSignsClean_x::Vector{Symbol}
+    glm5::iGLM
+    glm5_Z_x::Vector{Symbol}
+    corrvars_x::Vector{Symbol}
+    glm6_final::iGLM
+    Buyer_Pos_P1_is1::Bool
+    modelName::String
+    #logvar::Symbol
+    #logvar_colname::Symbol
+    #fdf::DataFrame
+    #rdf::DataFrame
+    #df_resid::DataFrame
+    #groupDeviance::Float64
+    function MPen(dfd::DataFrame,cfg::OrderedDict=Dict()) 
+        this=new(); this.modelName=:pen; 
+        #this.logvar=cfg[:pen_logvar]; this.y_var=cfg[:pen_y_var]; this.dist=Bernoulli() #Binomial(); this.logvar_colname = cfg[:pen_logvar_colname]; this.lnk=LogitLink()
+        this.removed_SingleLevelVars=Symbol[]
+        this.glm1_pvals_x=Symbol[]
+        this.glm2_ZnVIF_x=Symbol[]
+        this.glm3_PnSigns_x=Symbol[]
+        this.glm4_PnSignsClean_x=Symbol[]
+        this.corrvars_x=Symbol[]     
+        this.exclude_vars=Symbol[cfg[:occ_y_var],cfg[:occ_logvar],cfg[:occ_logvar_colname],cfg[:dolocc_y_var],cfg[:dolocc_logvar],cfg[:dolocc_logvar_colname] ]
+        this.Buyer_Pos_P1_is1=false
+        #dfd[this.logvar_colname] = log(Array(dfd[this.logvar]+1))
+        this.vars=setdiff(names(dfd),vcat(this.exclude_vars,[:iso,:whyo,:data_nb_ne_b, :data_b_e_nb ,:pen_reduction,:occ_reduction,:dolocc_reduction]))    
+        this.vars=setdiff(this.vars,[this.logvar, this.logvar_colname])
+        return this 
+    end
+end
+mpen = MPen(dfd,cfg)
+
+
+
+
+
+# =========================================================================
+# ==== Backup feature selection ================
+
+
+iocc = Dict(:modelName=>:occ, :raneff=>cfg[:random_campaigns], :y_var=>:trps_pos_p1, :logvar=>:LOG_trps_pre_p1, :logvarOrig=>:trps_pre_p1 )
+idolocc = Dict(:modelName=>:dolocc, :raneff=>cfg[:random_campaigns], :y_var=>:dol_per_trip_pos_p1, :logvar=>:LOG_dol_per_trip_pre_p1, :logvarOrig=>:dol_per_trip_pre_p1)
+ipen = Dict(:modelName=>:pen, :raneff=>cfg[:random_campaigns], :y_var=>:buyer_pos_p1, :logvar=>:LOG_buyer_pre_p1, :logvarOrig=>:buyer_pre_p1 )
+
+custom_vars = [:iso,:whyo,:data_nb_ne_b, :data_b_e_nb ,:pen_reduction,:occ_reduction,:dolocc_reduction]  
+for m in [iocc,idolocc,ipen] dfd[m[:logvar]]=log(Array(dfd[m[:logvarOrig]]+1)) end
+
+function genExcludeVars!(iocc::Dict,idolocc::Dict,ipen::Dict)  
+    iocc[:exclude_vars] = vcat( custom_vars,  
+                                [ :buyer_pos_p1, iocc[:logvarOrig]
+                                  ,idolocc[:y_var],idolocc[:logvar],idolocc[:logvarOrig] 
+                                 ,ipen[:y_var],ipen[:logvar],ipen[:logvarOrig] 
+                               ]
+                              )
+    idolocc[:exclude_vars] = vcat( custom_vars,  
+                                   [ :buyer_pos_p1, idolocc[:logvarOrig]
+                                           ,iocc[:y_var],iocc[:logvar],iocc[:logvarOrig] 
+                                           ,ipen[:y_var],ipen[:logvar],ipen[:logvarOrig] 
+                                   ]
+                                 )    
+    
+    ipen[:exclude_vars] = vcat( custom_vars,
+                                [ ipen[:logvarOrig]
+                                  ,iocc[:y_var],iocc[:logvar],iocc[:logvarOrig] 
+                                  ,idolocc[:y_var],idolocc[:logvar],idolocc[:logvarOrig] 
+                                ]
+                                 )        
+end
+genExcludeVars!(iocc,idolocc,ipen)
+
+
+function expandM(di::Dict)
+    d2=deepcopy(di)
+    if d2[:modelName]==:occ  
+        d2[:dist] = Poisson()
+        d2[:lnk] = LogLink()
+        d2[:Buyer_Pos_P1_is1] = true
+    end
+    if d2[:modelName]==:dolocc  
+        d2[:dist] = Gamma()
+        d2[:lnk] = LogLink()
+        d2[:Buyer_Pos_P1_is1] = true
+    end
+    if d2[:modelName]==:pen
+        d2[:dist] = Bernoulli()
+        d2[:lnk] = LogitLink()
+        d2[:Buyer_Pos_P1_is1] = false
+    end
+    return d2
+end
+#expandM(t)
+
+type iGLM
+    vars::Vector{Symbol}
+    f::DataFrames.Formula
+    g::Any #DataFrameRegressionModel
+    sdf::DataFrame
+    resids::DataFrame
+    function iGLM(dfd::DataFrame, m::Dict, vars::Array{Symbol} )  
+        this=new()
+        this.vars=Symbol[] 
+        m = expandM(m)
+        vars=setdiff(vars, [m[:y_var],m[:logvar]])
+        f = genFmula( m[:y_var], vars )
+        g = glm(f, dfd[convert(Array{Symbol},vcat(f.lhs,f.rhs.args[3:end]))]  , m[:dist], m[:lnk] )    #g.model.mm.assign
+        
+
+        #resp = g.model.rr
+        #resids = sign(resp.y - resp.mu) .* sqrt(resp.devresid)
+        #resids = sign(g.model.rr.y - g.model.rr.mu) .* sqrt(g.model.rr.devresid)
+        resp = g.model.rr
+        devresid = sqrt(map(x->x < 0 ? 0.0:x, resp.devresid) ) # because we could do abs(), but we want to order by extream pos vals, so set to zero
+        #resids = sign(resp.y - resp.mu) .* devresid
+        #resids = DataFrame(panid=dfd[:panid], resids=xResiduals(g) )
+        resids = DataFrame(panid=dfd[:panid], resids=sign(resp.y - resp.mu) .* devresid )
+        sdf = DataFrame(vars=vcat([:intercept],g.mf.terms.terms)  #g.model.mm.assign
+                                     , coef=coef(g)
+                                     , se=stderr(g)
+                                     , zval=coef(g)./stderr(g) 
+                                     , pval= ccdf(FDist(1, dof_residual(g)), abs2(coef(g)./stderr(g))  )
+                        ) 
+        this.f = f
+        this.g = g
+        this.sdf = sdf
+        this.resids = resids
+        this.vars = vars
+        return this 
+    end
+end
+#g1 = iGLM(dfd, m, vars  )
+
+
+
+function vif!(g::iGLM)
+    vdf=vif(g.g)
+    vdf[:vars] = convert(Array{Symbol}, vdf[:variable])
+    g.sdf = join(g.sdf,vdf[[:vars,:vif]], on = :vars, kind=:outer)
+end
+
+
+
+
+function checksingularity(form::Formula, data::DataFrame, tolerance = 1.e-8)
+    mf = ModelFrame(form, data)
+    mm = ModelMatrix(mf)
+    qrf = qrfact!(mm.m, Val{true})
+    vals = abs.(diag(qrf[:R]))
+    firstbad = findfirst(x -> x < min(tolerance, 0.5) * vals[1], vals)
+    if firstbad == 0
+        return Symbol[]
+    end
+    mf.terms.terms[view(mm.assign[qrf[:p]], firstbad:length(vals))]
+end
+
+
+
+# =======================================================================================
+# =======================================================================================
+
+
+
+
+
+function featureSelection(dfd::DataFrame, m::Dict)
+    function rmVars(v::DataArray{Any}) rmVars(convert(Array{Symbol},v)) end
+    function rmVars(v::Array{Any}) rmVars(convert(Array{Symbol},v)) end
+    function rmVars(v::Array{Symbol})
+        v=setdiff(v,[:group])
+        return setdiff(vars,v)  
+    end        
+    vars=setdiff(names(dfd),   vcat(m[:exclude_vars],m[:y_var],:panid,cfg[:random_demos],cfg[:random_campaigns],cfg[:scoring_vars]) )
+
+    upperModName = uppercase( string(  m[:modelName]  )  )
+    println( upperModName*" : SingleValue") #SingleValue
+    removed_SingleLevelVars=FS_singleLevel(dfd,vars)
+    vars = rmVars(removed_SingleLevelVars)
+    
+    println(upperModName*" : Singularity : "*string(genFmula(m[:y_var],vars))) # Singularity
+    singularity_x = checksingularity(genFmula(m[:y_var],vars), dfd)
+    vars = rmVars(singularity_x)
+    
+    println(upperModName*" : PVals") #PVals
+    g1 = iGLM(dfd, m, vars  )  
+    g1_x=g1.sdf[g1.sdf[:pval].>0.7,:vars]
+    vars = rmVars(g1_x)
+    
+    println( upperModName *" : Z & Vif") #Z & Vif
+    g2 = iGLM(dfd, m, vars  ) 
+    vif!(g2)
+    z = g2.sdf[abs(g2.sdf[:zval]).<1.96,:vars]
+    v = g2.sdf[ !DataArrays.isna(g2.sdf[:vif])&(g2.sdf[:vif].>15),:vars]
+    g2_x =intersect(z,v)
+    vars = rmVars(g2_x)
+
+
+    function chkSigns(m::Dict, vars::Array{Symbol}, dfd::DataFrame, cfg::OrderedDict)  # Pvalue & Signs
+        vars=unique(vcat(vars,[:group]))
+        g = iGLM(dfd, m, vars)  
+        neutralvars = setdiff(vars,vcat(cfg[:negativevars],cfg[:positivevars])) 
+        neg=intersect(cfg[:negativevars],g.sdf[g.sdf[:coef].<0,:vars])
+        pos=intersect(cfg[:positivevars],g.sdf[g.sdf[:coef].>0,:vars])
+        varstokeep = intersect(vcat(neutralvars, pos,neg) ,  g.sdf[ g.sdf[:pval].<cfg[:pvalue_lvl] ,:vars] )
+        return g, varstokeep
+    end
+
+    println(upperModName*" : SIGN Check 1") 
+    (g3, initialvars) = chkSigns(m, vars, dfd, cfg)
+    println(upperModName*" : SIGN Check 2") 
+    (g4, vars_2) = chkSigns(m, convert(Array{Symbol},initialvars) , dfd, cfg)
+
+
+    function getCorrVars(dfd::DataFrame, vars_2::Array{Symbol})
+        rm_lst=Symbol[]
+        if (length(vars_2) > 1) & (   length(getColswithType("num", dfd, convert(Array{Symbol},vars_2) ) ) > 1  )
+            stackdf = corDFD(dfd,vars_2)
+            stackdf[:variable_pval] = [ g4.sdf[g4.sdf[:vars].==c,:pval][1]   for c in stackdf[:variable]]
+            stackdf[:vars_pval] = [ g4.sdf[g4.sdf[:vars].==c,:pval][1]   for c in stackdf[:vars]] 
+            stackdf[:most_Sig] = map((x,y) -> x < y ? "variable" : "vars" ,stackdf[:variable_pval],stackdf[:vars_pval])
+     
+            for row in eachrow(stackdf[(stackdf[:value].> 0.8) | (stackdf[:value].<-0.8),:])
+                if row[:vars] == "group"
+                    push!(rm_lst,row[:variable])
+                elseif row[:variable] == "group"
+                    push!(rm_lst,row[:vars])
+                else
+                    row[:most_Sig] == "variable" ? push!(rm_lst,row[:vars]) : push!(rm_lst,row[:variable])
+                end
+            end    
+        end
+        return rm_lst
+    end
+    
+    println(upperModName*" : Correlation") 
+    corrvars_x = getCorrVars(dfd,convert(Array{Symbol},setdiff(vars_2,factor_cols)))
+    vars_2 = setdiff(vars_2,corrvars_x)
+    
+    (g5, finalvars) =  chkSigns(m, convert(Array{Symbol},vars_2), dfd, cfg)
+    m[:finalvars] = convert(Array{Symbol},finalvars)
+    
+    println(upperModName*" : Final Review") # Final Review:
+    g6 = iGLM(dfd, m , convert(Array{Symbol},vcat(finalvars,[:group]))  )
+    #rename!(m.glm6_final.resids,:resids,Symbol(m.modelName*"_residual"))
+    #m.df_resid = m.glm6_final.resids
+    return g6
+end
+
+
+factor_cols=vcat( [ cfg[:proscore], :group, :panid], cfg[:allrandoms] )
+
+for c in setdiff(factor_cols,[:panid, cfg[:proscore]]) #cfg[:random_campaigns]
+    if !( typeof(dfd[c]) in [  DataArray{String,1}  ]) 
+        println("converting to Strings : ", c," of type : ",typeof(dfd[c]))
+        dfd[c] = map(x->string(x),dfd[c])
+        dfd[c] = convert(Array{String},dfd[c]) 
+    end
+end
+poolit!(dfd,factor_cols)
+
+ 
+
+g6_occ = featureSelection(dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:], iocc)
+g6_dolocc   = featureSelection(dfd[(dfd[:iso].==false)&(dfd[:buyer_pos_p1].==1),:], idolocc)
+g6_pen  = featureSelection(dfd[(dfd[:iso].==false) ,:], ipen)
+
+
+
+# ======================================================================================
+
+
+type iGLM
+    vars::Vector{Symbol}
+    f::DataFrames.Formula
+    g::Any #DataFrameRegressionModel
+    sdf::DataFrame
+    resids::DataFrame
+    function iGLM(dfd::DataFrame, m::Dict, vars::Array{Symbol} )  
+        this=new()
+        this.vars=Symbol[] 
+        m = expandM(m)
+        vars=setdiff(vars, [m[:y_var],m[:logvar]])
+        f = genFmula( m[:y_var], vars )
+        g = glm(f, dfd[convert(Array{Symbol},vcat(f.lhs,f.rhs.args[3:end]))]  , m[:dist], m[:lnk] )    #g.model.mm.assign
+        
+
+        #resp = g.model.rr
+        #resids = sign(resp.y - resp.mu) .* sqrt(resp.devresid)
+        #resids = sign(g.model.rr.y - g.model.rr.mu) .* sqrt(g.model.rr.devresid)
+        resp = g.model.rr
+        devresid = sqrt(map(x->x < 0 ? 0.0:x, resp.devresid) ) # because we could do abs(), but we want to order by extream pos vals, so set to zero
+        #resids = sign(resp.y - resp.mu) .* devresid
+        #resids = DataFrame(panid=dfd[:panid], resids=xResiduals(g) )
+        resids = DataFrame(panid=dfd[:panid], resids=sign(resp.y - resp.mu) .* devresid )
+        sdf = DataFrame(vars=vcat([:intercept],g.mf.terms.terms)  #g.model.mm.assign
+                                     , coef=coef(g)
+                                     , se=stderr(g)
+                                     , zval=coef(g)./stderr(g) 
+                                     , pval= ccdf(FDist(1, dof_residual(g)), abs2(coef(g)./stderr(g))  )
+                        ) 
+        this.f = f
+        this.g = g
+        this.sdf = sdf
+        this.resids = resids
+        this.vars = vars
+        return this 
+    end
+end
+#g1 = iGLM(dfd, m, vars  )
+
+
+
+#include("/media/u01/analytics/RegTools/diagnostics.jl")
+#include("/media/u01/analytics/RegTools/misc.jl")
+#include("/media/u01/analytics/RegTools/modsel.jl")
+
+
+function vif!(g::iGLM)
+    vdf=vif(g.g)
+    vdf[:vars] = convert(Array{Symbol}, vdf[:variable])
+    g.sdf = join(g.sdf,vdf[[:vars,:vif]], on = :vars, kind=:outer)
+end
+
+
+
+
+
+
+# =======================================================================================
+# =======================================================================================
+
+
+
+
+"""
+
+function vif(dfrm::RegressionModel)
+    X = dfrm.mf.df[2:end]
+    rhs = extractrhs(dfrm)
+    result = DataFrame(variable=rhs.rhsarray, vif=0.0)
+    i = 1
+    for (var in rhs.rhsarray)
+        lhs = parse(var)
+        rhsnew = replace(rhs.rhsstring, "+"*var, "")
+        rhsnew = rhsnew[2:end]
+        rhsnew = parse(rhsnew)
+        fnew = Formula(lhs, rhsnew)
+        newfit = fit(LinearModel, fnew, X)
+        r2 = rsquared(newfit)
+        result[:vif][i] = 1 / (1-r2)
+        i = i + 1
+    end
+    result
+end
+
+
+function rsquared(dfrm::RegressionModel)
+    SStot = sum((dfrm.model.rr.y - mean(dfrm.model.rr.y)).^2)
+    SSres = sum((dfrm.model.rr.y - dfrm.model.rr.mu).^2)
+    return (1-(SSres/SStot))
+end
+
+
+julia> Pkg.status()
+16 required packages:
+ - DataFrames                    0.8.4
+ - DataStructures                0.4.6
+ - Distributions                 0.11.0
+ - Feather                       0.2.1
+ - GLM                           0.6.0
+ - Gadfly                        0.5.1
+ - HDF5                          0.6.6
+ - JLD                           0.6.4
+ - JSON                          0.8.0
+ - JavaCall                      0.4.2
+ - JuMP                          0.14.1
+ - MixedModels                   0.5.7+             master
+ - NLopt                         0.3.3
+ - RCall                         0.5.2
+ - StatsBase                     0.11.1
+ - StatsFuns                     0.3.1
+51 additional packages:
+ - AxisAlgorithms                0.1.5
+ - BinDeps                       0.4.5
+ - Blosc                         0.1.7
+ - Calculus                      0.1.15
+ - CategoricalArrays             0.0.6
+ - ColorTypes                    0.2.11
+ - Colors                        0.6.9
+ - Combinatorics                 0.3.2
+ - Compat                        0.9.2
+ - Compose                       0.4.4
+ - Contour                       0.2.0
+ - DataArrays                    0.3.8
+ - DataStreams                   0.1.1
+ - Distances                     0.3.2
+ - FileIO                        0.2.0
+ - FixedPointNumbers             0.2.1
+ - FixedSizeArrays               0.2.4
+ - FlatBuffers                   0.1.2
+ - ForwardDiff                   0.2.5
+ - GZip                          0.2.20
+ - Hexagons                      0.0.4
+ - Hiccup                        0.0.3
+ - Interpolations                0.3.6
+ - Iterators                     0.1.10
+ - Juno                          0.2.3
+ - KernelDensity                 0.3.0
+ - Lazy                          0.11.4
+ - LegacyStrings                 0.1.1
+ - Loess                         0.0.7
+ - MacroTools                    0.3.2
+ - MathProgBase                  0.5.6
+ - Measures                      0.0.3
+ - Media                         0.2.3
+ - NaNMath                       0.2.1
+ - NamedArrays                   0.5.2
+ - NullableArrays                0.0.10
+ - Optim                         0.6.1
+ - PDMats                        0.5.0
+ - Polynomials                   0.1.0
+ - PositiveFactorizations        0.0.2
+ - Ratios                        0.0.4
+ - Reexport                      0.0.3
+ - RegTools                      0.0.0-             master (unregistered)
+ - ReverseDiffSparse             0.5.8
+ - Rmath                         0.1.3
+ - SHA                           0.2.1
+ - Showoff                       0.0.7
+ - SortingAlgorithms             0.1.0
+ - URIParser                     0.1.6
+ - WeakRefStrings                0.2.0
+ - WoodburyMatrices              0.2.0
+
+
+
+
+"""
+#    include("/home/iriadmin/.julia/v0.5/RegTools/src/diagnostics.jl")
+#    include("/home/iriadmin/.julia/v0.5/RegTools/src/misc.jl")
+#    include("/home/iriadmin/.julia/v0.5/RegTools/src/modsel.jl")
+
+
+
+            
+            
+
+ function runclusteredModels(shelf::OrderedDict)
+     wids = workers()   
+    #ml = genModelList(modelsDict)
+    #shelf = OrderedDict(Symbol(string(ml[i,:][1])*"_"*string(ml[i,:][2]))=> 
+    #    Dict(:model=>ml[i,:][1],:renef=>ml[i,:][2],:status=>:ready, :worker=>0, :channel=>Channel(1)) for i in 1:length(ml[:,1]))
+            
+     for v in values(shelf)  v[:status]=:ready; v[:worker]=0; v[:channel]=Channel(1) end 
+        
+     function processReady(shelf::OrderedDict) 
+    for (k,v) in  filter((k,v)-> (v[:status]==:running)&(isready(v[:channel])==true) ,shelf)
+        v[:results] = take!(v[:channel])   #fetch(v[:channel])
+        v[:status] = :complete
+        v[:worker] = 0
+        println("Task Completed : ",v[:model]," ~ ",v[:renef])
+        close(v[:channel])
+    end
+     end
+        
+     freeW() = setdiff(wids,[v[:worker] for (k,v) in filter((k,v)-> v[:status]==:running ,shelf)]) 
+     runningW() = filter((k,v)-> v[:status]==:running ,shelf) 
+     hasfreeW() = length(freeW()) > 0 ? true : false
+     nextFreeW() = length(freeW()) > 0 ? freeW()[1]   : NA
+     hasRunning() = length(runningW()) > 0 ? true : false
+
+     function runTask(mkey::Symbol)
+        wid = nextFreeW() 
+        if isna(wid)
+            return false
+        else
+            w = shelf[mkey]
+            w[:status] = :running
+            w[:worker] = wid
+            @async put!(w[:channel], remotecall_fetch(runGlmm, wid, mod_fname, jmod_fname, w[:model], w[:renef] )) 
+            return true
+        end
+     end
+
+     #gethostworkers()
+     waitforFreeWorker() = while !hasfreeW() println("waiting"); processReady(shelf); sleep(15) end
+     @async for (k,v) in shelf
+         waitforFreeWorker()
+         println("running : ",k)
+         runTask(k)
+     end
+     #if hasRunning() processReady(); end
+                   
+    return shelf
+end
+        
+    
