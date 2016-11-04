@@ -203,6 +203,47 @@ end
 Pre_out(df_in)
 
 
+# --- parallel RF
+
+function build_forest(labels, features, nsubfeatures, ntrees, ncpu=1)
+                  if ncpu > nprocs()
+                       addprocs(ncpu - nprocs())
+                  end
+                  Nlabels = length(labels)
+                  Nsamples = int(0.7 * Nlabels)
+                  forest = @parallel (vcat) for i in [1:ntrees]
+                      inds = rand(1:Nlabels, Nsamples)
+                      build_tree(labels[inds], features[inds,:], nsubfeatures)
+                  end
+                  return [forest]
+              end
+
++++++++++Distribute Macro ++++++++++++++++++++++++++++
+function sync_add(r)
+    spawns = get(task_local_storage(), :SPAWNS, ())
+    if spawns !== ()
+        push!(spawns[1], r)
+        if isa(r, Task)
+            tls_r = get_task_tls(r)
+            tls_r[:SUPPRESS_EXCEPTION_PRINTING] = true
+        end
+    end
+    r
+end
+
+spawnat(p, thunk) = sync_add(remotecall(thunk, p))
+
+macro spawnat(p, expr)
+    expr = localize_vars(esc(:(()->($expr))), false)
+    :(spawnat($(esc(p)), $expr))
+end
+
+macro run(p, expr)
+    expr = localize_vars(esc(:(()->($expr))), false)
+    :(spawnat($(esc(p)), $expr))
+end
++++++++++++++++++++++++++++++++++++++
+
 
 ================== XGBoost ============================================= https://www.kaggle.com/wacaxx/rossmann-store-sales/julia-xgboost-starter-code
 using BinDeps, DataFrames, XGBoost

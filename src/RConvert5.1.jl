@@ -23,13 +23,15 @@ const cfgDefaults=OrderedDict( :P2_Competitor => true
                         ,:TotalModelsOnly=>false
                        )
 
+root = pwd()
+
 
 #root="/mnt/resource/analytics/models"
 #Default
 cfgDefaults[:random_demos] = [:estimated_hh_income,:hh_age,:number_of_children_in_living_Un,:person_1_gender]
 cfgDefaults[:random_campaigns] = [:Publisher_Fct1,:Targeting_Fct1]
 cfgDefaults[:exposed_flag_var] = :exposed_flag_new
-root = pwd()
+
 
 # --------------------------------- CAMPAIGNS ----------------------------------------
 #NatC : 
@@ -44,7 +46,7 @@ cfgDefaults[:random_campaigns] = [:Publisher_Fct1,:Targeting_Fct1]
 cfgDefaults[:exposed_flag_var] = :exposed_flag_new
 root="/mnt/resource/analytics/models/CDW"
 
-"""
+
 # JennieO - :creative :publisher1 :placement
 cfgDefaults[:random_demos] = [:estimated_hh_income,:hh_age,:number_of_children_in_living_Un,:person_1_gender]
 cfgDefaults[:random_campaigns] = [:creative,:publisher1,:placement]
@@ -57,7 +59,43 @@ cfgDefaults[:random_demos] = [:hh_age,:estimated_hh_income,:number_of_children_i
 cfgDefaults[:random_campaigns] = [:creativename, :media_source,:media_type,:publisher,:targeting]
 cfgDefaults[:exposed_flag_var] = :exposed_flag_new
 root="/mnt/resource/analytics/models/rev"
-"""
+
+
+#ALL#10  - /mapr/mapr04p/analytics0001/analytic_users/Models/All_10_944/All_10_Modeling_944/Output 
+root="/mnt/resource/analytics/models/ALL#10"
+cfgDefaults[:random_demos] = [:estimated_hh_income,:hh_age,:number_of_children_in_living_Un,:person_1_gender]
+cfgDefaults[:random_campaigns] = [:creative,:ad_type,:publisher,:frequency_type]
+cfgDefaults[:exposed_flag_var] = :exposed_flag_new
+
+
+#ALL#11  - /mapr/mapr04p/analytics0001/analytic_users/Models/All_11_983/All_11_983_Modeling/Output
+root="/mnt/resource/analytics/models/ALL#11"
+cfgDefaults[:random_demos] = [:estimated_hh_income, :hh_age, :number_of_children_in_living_Un, :person_1_gender]
+cfgDefaults[:random_campaigns] = [:creative,:ad_type,:publisher,:frequency_type]
+cfgDefaults[:exposed_flag_var] = :exposed_flag_new
+
+
+#CDW#6  - /mapr/mapr04p/analytics0001/analytic_users/Models/CDW_6_949/CDW6_modeling/Output7”
+root="/mnt/resource/analytics/models/CDW#6"
+cfgDefaults[:exposed_flag_var] = :exposed_flag_new
+cfgDefaults[:random_demos] = [:estimated_hh_income, :hh_age, :number_of_children_in_living_Un, :person_1_gender]
+cfgDefaults[:random_campaigns] = [:viewability_break, :Publisher_Fct1,:Targeting_Fct1]
+
+
+#HormelChili#8  - /mapr/mapr04p/analytics0001/analytic_users/Models/Hormel_Chili_8/Hormel_Chili8_model/output
+root="/mnt/resource/analytics/models/HormelChili#8"
+cfgDefaults[:exposed_flag_var] = :exposed_flag_new
+cfgDefaults[:random_demos] = [:estimated_hh_income, :hh_age, :number_of_children_in_living_Un, :person_1_gender]
+cfgDefaults[:random_campaigns] = [:publisher,:media_type,:creativename]
+
+
+#Rev#8  -        "/mapr/mapr04p/analytics0001/analytic_users/Models/Hormel_Rev_8_967/Hormel_Rev_8_Data/Output1/"
+root="/mnt/resource/analytics/models/Rev#8"
+cfgDefaults[:exposed_flag_var] = :exposed_flag_new
+cfgDefaults[:random_demos] = [:estimated_hh_income, :hh_age, :number_of_children_in_living_Un, :person_1_gender]
+cfgDefaults[:random_campaigns] = [:Creative_fct_1,:Targeting_fct_1,:Publisher_fct_1,:MediaType_fct_1,:MediaSource_fct_1]
+
+
 
 # ------------------------------- END CAMPAIGNS --------------------------------------
 
@@ -302,6 +340,7 @@ cfg=lowercase(cfg)
 
 #SAVE FILE
 writetable(root*"/matched_dfd.csv", dfd)
+#dfd = readtable(root*"/matched_dfd.csv",header=true);
 
 ######################################
 #------------MODEL OBJECTS-----------#  [:fea_or_dis_trps_shr_dpp_p1,:fea_or_dis_trps_shr_dpp_p2,:fea_or_dis_trps_shr_dpp_p3,:fea_or_dis_trps_shr_dpp_p4]
@@ -373,6 +412,30 @@ end
 #    end
 #    mf.terms.terms[view(mm.assign[qrf[:p]], firstbad:length(vals))]
 #end
+"""
+singularity_x = checksingularity(genF(m[:y_var],vars), dfd)
+
+ if isa(e, Base.LinAlg.PosDefException)
+                    v=this.vfactors[e.info-1]
+                    push!(this.xvars,v)
+                    println("!!! Multicollinearity, removing :",v,"~~~",e.info-1, "\n~~~",e)
+                else
+vcat(f.lhs,f.rhs.args[3:end])[error-1]
+
+
+function checksingularity(form::Formula, data::DataFrame, tolerance = 1.e-8)
+    mf = ModelFrame(form, data)
+    mm = ModelMatrix(mf)
+    qrf = qrfact!(mm.m, Val{true})
+    vals = abs.(diag(qrf[:R]))
+    firstbad = findfirst(x -> x < min(tolerance, 0.5) * vals[1], vals)
+    if firstbad == 0
+        return Symbol[]
+    end
+    mf.terms.terms[view(mm.assign[qrf[:p]], firstbad:length(vals))]
+end
+
+"""
 
 
 
@@ -380,7 +443,7 @@ function featureSelection(dfd::DataFrame, m::Dict)
     function rmVars(v::DataArray{Any}) rmVars(convert(Array{Symbol},v)) end
     function rmVars(v::Array{Any}) rmVars(convert(Array{Symbol},v)) end
     function rmVars(v::Array{Symbol})
-        v=setdiff(v,[:group])
+        #v=setdiff(v,[:group])
         return setdiff(vars,v)  
     end        
     vars=setdiff(names(dfd),   vcat(m[:exclude_vars],m[:y_var],:panid,cfg[:random_demos],cfg[:random_campaigns],cfg[:scoring_vars]) )
@@ -577,52 +640,13 @@ end
 saveModels(modelsDict, jmod_fname)
 
 
-function distributeDataset()
-    #jmod_fname = root*"/dfd_model.json"
-    #mod_fname
-    #ppp="/mnt/resource/analytics/models/"; run(`ls $ppp`)
-    ips = ["10.63.36.18", "10.63.36.22","10.63.36.23"]
-    ip="10.63.36.22"
-    for ip in ips
-        #run(`ssh $ip mkdir $root`)
-        run(`scp $root/dfd_model.* $ip:$root/`)
-    end
-end
-#j = readModels(jmod_fname)
-#group & raneff
-
-
-
-
 # ---- END SAVE RESULTS -------
 """
-function gethostModelDistribution(raneff::Array{Symbol})
-    function allocateCore(a::Array{Int64})
-        proc = a[1]
-        ao = length(setdiff(a,proc)) > 0 ?  setdiff(a,proc) : a
-        return proc, ao
-    end
-    nodehosts = gethostworkers()
-    hosts = [k for k in keys(nodehosts)]
-    hostcnt = length(hosts)
-    #raneff = [:creative, :publisher1, :placement]
-    h=1
-    m=:pen
-    penprocs = Dict()
-    for r in raneff
-        proc, nodehosts[hosts[h]] = allocateCore(nodehosts[hosts[h]])
-        penprocs[r] = Dict(:proc=>proc, :host=>hosts[h])
-        println(r,"  :  ", hosts[h], "  ",proc)
-        h = h == hostcnt ? h=1 : h+1
-    end
-    
-    static_nodehosts = deepcopy(nodehosts)
-    
-    println("Pen : ",penprocs )
-    println(nodehosts)
-end
 
-gethostModelDistribution([:creative, :publisher1, :placement])
+
+##j = readModels(jmod_fname)
+##group & raneff
+
 
 function raneffStats(raneff::Array{Symbol})
     #ranef = modelsDict[:ipen][:raneff]
@@ -632,28 +656,34 @@ end
 
 
 
+
+
+
+
+
+
+# ------------------------------------------------------------
 # -------- RESTART FROM HERE ------------
-#addprocs([("iriadmin@10.63.36.22", :auto), ("iriadmin@10.63.36.23", :auto)])
-#using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , JuMP,NLopt, Distributions, MixedModels, StatsBase,  JSON
-#@everywhere using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , JuMP,NLopt, Distributions, MixedModels, StatsBase,  JSON
+# ------------------------------------------------------------
 
-#addprocs(5)
-#using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , JuMP,NLopt, HDF5, JLD, Distributions, MixedModels, RCall, StatsBase, StatLib, JSON
-#@everywhere using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , JuMP,NLopt, HDF5, JLD, Distributions, MixedModels, RCall, StatsBase, StatLib, JSON
-#/mnt/resource/analytics/models CDW  Jenny-o  NatChoice  rev
-
-#addprocs([("iriadmin@10.63.36.22", 2), ("iriadmin@10.63.36.23", 2)])
-addprocs([("iriadmin@10.63.36.22", 2)])
+addprocs([("iriadmin@10.63.36.22", 1), ("iriadmin@10.63.36.23", 1)])
 addprocs(2)
-using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , Distributions, MixedModels, StatsBase, JSON
-@everywhere using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , Distributions, MixedModels, StatsBase, JSON
+using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , Distributions, MixedModels, StatsBase, JSON, StatLib
+@everywhere using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , Distributions, MixedModels, StatsBase, JSON, StatLib
 
 
 #root=pwd()
 #root = "/mnt/resource/analytics/Natural_choice_5_851_modeling"   
 root="/mnt/resource/analytics/models/Jenny-o"
 #root="/mnt/resource/analytics/scoring/Jennie-o_1_020916_Modeling"
+root="/mnt/resource/analytics/models/NatChoice"
 root="/mnt/resource/analytics/models/rev"
+root="/mnt/resource/analytics/models/ALL#10"
+root="/mnt/resource/analytics/models/ALL#11"
+root="/mnt/resource/analytics/models/CDW#6"
+root="/mnt/resource/analytics/models/HormelChili#8"
+root="/mnt/resource/analytics/models/Rev#8"
+
 
 jmod_fname = root*"/dfd_model.json"
 mod_fname = root*"/dfd_model.csv" 
@@ -662,25 +692,6 @@ mod_fname = root*"/dfd_model.csv"
 
 
 
-function gethostworkers()
-    d = Dict()
-    @sync @async for (idx, pid) in enumerate(workers())
-        d[pid] = remotecall_fetch(getipaddr,pid)
-    end
-    iout=Dict()
-    for ip in [string(ip) for ip in unique(values(d))]
-        a=Int64[]
-        for (key, value) in d
-            if string(value) == ip
-                push!(a,key)
-            end
-        end    
-        iout[ip] = sort(a)
-    end
-    l = get(iout,string(getipaddr()),[])
-    iout[string(getipaddr())] = convert(Array{Int64},vcat([1],l))
-    return iout
-end
 
 
 
@@ -891,6 +902,20 @@ function getranef(m::Dict)
 end
     
 
+    
+    
+    
+
+function runSequentialModels(mod_fname::String, jmod_fname::String, shelf::OrderedDict)
+    for v in values(shelf)
+            v[:results] = runGlmm( mod_fname,jmod_fname, v[:model], v[:renef])            
+    end
+end
+
+       
+    
+    
+    
 function processReady(shelf::OrderedDict) 
     for (k,v) in  filter((k,v)-> (v[:status]==:running)&(isready(v[:channel])==true) ,shelf)
         v[:results] = take!(v[:channel])   #fetch(v[:channel])
@@ -909,7 +934,11 @@ hasReady(shelf::OrderedDict) = length(readyW(shelf)) > 0 ? true : false
 NotcompleteW(shelf::OrderedDict) = filter((k,v)-> v[:status]!=:complete ,shelf) 
 isCompleteW(shelf::OrderedDict) = length(NotcompleteW(shelf)) == 0 ? true : false    
 
-function runclusteredModels(shelf::OrderedDict)
+statusW(shelf::OrderedDict) =  [ string(v[:model])*":"*string(v[:renef])*"   status: "*string(v[:status]) for v in values(shelf)] 
+    
+    
+    
+    function runclusteredModels(mod_fname::String, jmod_fname::String, shelf::OrderedDict)
      wids = workers()    
      for v in values(shelf)  v[:status]=:ready; v[:worker]=0; v[:channel]=Channel(1) end 
      freeW() = setdiff(wids,[v[:worker] for (k,v) in filter((k,v)-> v[:status]==:running ,shelf)]) 
@@ -940,41 +969,128 @@ end
         
     
 
-#/mnt/resource/analytics/rev7
-    #(length(workers())==1)&(workers()[1]==1)
+    
+function distributeDataset()
+    #jmod_fname = root*"/dfd_model.json"
+    #mod_fname
+    #ppp="/mnt/resource/analytics/models/"; run(`ls $ppp`)
+    ips = ["10.63.36.22","10.63.36.23"]
+    for ip in ips
+            cmd=`scp $root/dfd_model.* $ip:$root/`
+            println(cmd)
+            run(cmd)
+        #run(`ssh $ip mkdir $root`)
+        #run(`scp $root/dfd_model.* $ip:$root/`)
+    end
+end
+        
+
+macro checked_lib(libname, path)
+    println("GTPath  : ",path,"  ~  ",libname)
+    ((VERSION >= v"0.4.0-dev+3844" ? Base.Libdl.dlopen_e : Base.dlopen_e)(path) == C_NULL) && error("Unable to load \n\n$libname ($path)\n\nPlease re-run Pkg.build(package), and restart Julia.")
+    quote const $(esc(libname)) = $path end
+end
+
+    
+    
 modelsDict = readModels(jmod_fname)       
 ml = genModelList(modelsDict)
-shelf = OrderedDict(Symbol(string(ml[i,:][1])*"_"*string(ml[i,:][2]))=> Dict{Symbol,Any}( :model=>ml[i,:][1],:renef=>ml[i,:][2]) for i in 1:length(ml[:,1]))    
-runclusteredModels(shelf)
-while !isCompleteW(shelf) println("Not Complete yet!"); sleep(5); if !hasReady(shelf) processReady(shelf) end end
-shelf        
-for (k,v) in shelf
-    v[:sdf]= ranefMe(v[:results])
-    v[:sdf][:model] = v[:model]
-    v[:sdf][:ranef] = v[:renef]
-end        
-rdf = vcat([v[:sdf]for v in values(shelf)])
-        rdf[:zval] = NA
-        rdf[:pval] = NA
-        rdf[:modelType] = "MixedModels"
-# rdf[(rdf[:model].==:ipen)&(rdf[:break].==:placement),:]
-writetable(root*"/raneff_out_df.csv", rdf)       
+shelf = OrderedDict(Symbol(string(ml[i,:][1])*"_"*string(ml[i,:][2]))=> Dict{Symbol,Any}( :model=>ml[i,:][1],:renef=>ml[i,:][2]) for i in 1:length(ml[:,1]))   
         
-
-     dfd = readtable(mod_fname,header=true);
-     glist = genM(dfd, modelsDict)
-     go_pen=coefDF(glist[:ipen])
-     go_dolocc=coefDF(glist[:idolocc])
-     go_occ=coefDF(glist[:iocc])
-     go_occ[:model] = "occ"
-     go_dolocc[:model] = "dolocc"
-     go_pen[:model] = "pen"
-     xgo = vcat(go_occ,go_dolocc,go_pen)
-     xgo[:ranef] = NA
-        xgo[:modelType] = "Glm"
-     writetable(root*"/glm_out_df.csv", xgo)
-
-        campaign = vcat(rdf,xgo)
+function modelMe(mod_fname::String, jmod_fname::String, shelf::OrderedDict)
+    if (length(workers())==1)&(workers()[1]==1)
+        println("\n\nRUNNING SEQUENTIAL WITH 1 CORE\n\n")
+        runSequentialModels(mod_fname, jmod_fname, shelf) 
+        #gmm1 = fit!(glmm(form, dat, Bernoulli()), false, 0)
+    else
+        runclusteredModels(mod_fname, jmod_fname, shelf)
+        #statusW(shelf)
+        while !isCompleteW(shelf) println("Not Complete yet!"); sleep(5); if !hasReady(shelf) processReady(shelf) end end
+        #shelf        
+    end      
+end         
+modelMe(mod_fname, jmod_fname, shelf)
+            
+function consolidateModels(modelsDict::Dict, mod_fname::String, shelf::OrderedDict)
+    for (k,v) in shelf
+        v[:sdf]= ranefMe(v[:results])
+        v[:sdf][:model] = v[:model]
+        v[:sdf][:ranef] = v[:renef]
+    end        
+    rdf = vcat([v[:sdf]for v in values(shelf)])
+    ranDF = deepcopy(rdf)
+    #writetable(root*"/raneff_out_df.csv", rdf)
+    rdf[:zval] = NA
+    rdf[:pval] = NA
+    rdf[:modelType] = "MixedModels"
+    # rdf[(rdf[:model].==:ipen)&(rdf[:break].==:placement),:]
+       
+    dfd = readtable(mod_fname,header=true);
+    glist = genM(dfd, modelsDict)
+    go_pen=coefDF(glist[:ipen])
+    go_dolocc=coefDF(glist[:idolocc])
+    go_occ=coefDF(glist[:iocc])
+    go_occ[:model] = "occ"
+    go_dolocc[:model] = "dolocc"
+    go_pen[:model] = "pen"
+    xgo = vcat(go_occ,go_dolocc,go_pen)
+    glmDF = deepcopy(xgo)
+    #writetable(root*"/glm_out_df.csv", xgo)
+    xgo[:ranef] = NA
+    xgo[:modelType] = "Glm"
+    campaign = vcat(rdf,xgo)
+    return ranDF, glmDF, campaign
+end
+    
+(ranDF, glmDF, campaign) = consolidateModels(modelsDict, mod_fname, shelf)
+        
+writetable(root*"/glm_out_df.csv", glmDF)
+writetable(root*"/raneff_out_df.csv", ranDF)
+writetable(root*"/campaign_df.csv", campaign)
+        
+        
+        
+        
+        
+ """       
+#@less Base.LOAD_CACHE_PATH[1]
+Base.LOAD_CACHE_PATH[1]="/mapr/mapr04p/analytics0001/analytic_users/jpkg/v0.5"
+ENV["JULIA_PKGDIR"]  = "/mapr/mapr04p/analytics0001/analytic_users/jpkg"
+push!(LOAD_PATH, "/mapr/mapr04p/analytics0001/analytic_users/jpkg/v0.5")
+pop!(LOAD_PATH)
+Pkg.init()
+Pkg.add("MixedModels")
+Pkg.add("DataStructures")
+Pkg.add("DataArrays")
+Pkg.add("DataFrames")
+Pkg.add("StatsFuns")
+Pkg.add("GLM")
+Pkg.add("Distributions")
+Pkg.add("StatsBase")
+Pkg.add("NLopt")
+Pkg.add("JSON")
+Pkg.clone("https://github.com/MozzyTrd/StatLib.jl.git")
+using DataStructures, DataArrays , DataFrames, StatsFuns, GLM , Distributions, MixedModels, StatsBase, JSON, StatLib
+        
+Pkg.add("HDF5")
+Pkg.add("JavaCall") 
+Pkg.add("JuMP")
+        Pkg.clone("https://github.com/MozzyTrd/StatStack.jl.git")
+Pkg.add("NLsolve")
+Pkg.add("DBAPI")
+Pkg.add("JavaCall")
+Pkg.add("JDBC")
+Pkg.add("HDF5")
+Pkg.add("JLD")
+Pkg.add("RCall")
+Pkg.add("Feather")
+Pkg.add("DecisionTree")
+Pkg.add("XGBoost")
+       
+using HDF5, JavaCall, JuMP, StatStack, NLsolve, DBAPI, JavaCall, JDBC, HDF5, JLD, RCall, Feather, DecisionTree, XGBoost
+        
+        
+"""     
         
         
         
@@ -983,7 +1099,15 @@ writetable(root*"/raneff_out_df.csv", rdf)
         
         
         
-   
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         
         
