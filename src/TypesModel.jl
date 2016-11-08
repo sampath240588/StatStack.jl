@@ -127,12 +127,12 @@ type MOcc <: MModel
     fmula::AbstractString
     modelName::AbstractString
     logvar::AbstractString
-    function MOcc(df_data::DataFrame,cfg::OrderedDict) this=new(); this.modelName="occ"; this.logvar="trps_pre_p1"; #this.sdf=pushSDFrow!(deepcopy(SDF),"Total Campaign",this.v_model);
+    function MOcc(df_data::DataFrame,cfg::OrderedDict) this=new(); this.modelName="occ"; if   cfg[:offset]  this.logvar="trps_pre_p1"; end#this.sdf=pushSDFrow!(deepcopy(SDF),"Total Campaign",this.v_model);
         this.fList=Symbol[]; this.rList=Symbol[]; this.dList=Symbol[]
         #this.hasBreaks=false
         this.fmula=""
         idf=readFixedFile("Occasion/Occ_fixed_effects.csv")
-        this.feff=FOcc(df_data, idf)
+        this.feff=FOcc(df_data, idf,cfg)
         idf=readRandFile("Occasion/Occ_random_effects.csv",cfg)
         this.reff=ROcc(df_data, idf)
         this.hasBreaks = length(idf[1])==0 ? false : true
@@ -156,11 +156,11 @@ type MDolOcc <: MModel
     fmula::AbstractString
     modelName::AbstractString
     logvar::AbstractString
-    function MDolOcc(df_data::DataFrame,cfg::OrderedDict) this=new(); this.modelName="dolocc"; this.logvar="dol_per_trip_pre_p1"; #this.sdf=pushSDFrow!(deepcopy(SDF),"Total Campaign",this.v_model);
+    function MDolOcc(df_data::DataFrame,cfg::OrderedDict) this=new(); this.modelName="dolocc"; if  ( cfg[:offset])  this.logvar="dol_per_trip_pre_p1"; end #this.sdf=pushSDFrow!(deepcopy(SDF),"Total Campaign",this.v_model);
         this.fList=Symbol[]; this.rList=Symbol[]; this.dList=Symbol[]
         this.fmula=""
         idf=readFixedFile("DollarsOccasion/DolOcc_fixed_effects.csv")
-        this.feff=FDolOcc(df_data, idf)
+        this.feff=FDolOcc(df_data, idf, cfg)
         idf=readRandFile("DollarsOccasion/DolOcc_random_effects.csv",cfg)
         this.reff=RDolOcc(df_data, idf)
         this.hasBreaks = length(idf[1])==0 ? false : true
@@ -182,11 +182,11 @@ type MPen <: MModel
     fmula::AbstractString
     modelName::AbstractString
     logvar::AbstractString
-    function MPen(df_data::DataFrame,cfg::OrderedDict) this=new(); this.modelName="pen"; this.logvar="buyer_pre_p1"; #this.sdf=pushSDFrow!(deepcopy(SDF),"Total Campaign",this.v_model);
+    function MPen(df_data::DataFrame,cfg::OrderedDict) this=new(); this.modelName="pen";if  ( cfg[:offset])  this.logvar="buyer_pre_p1"; end#this.sdf=pushSDFrow!(deepcopy(SDF),"Total Campaign",this.v_model);
         this.fList=Symbol[]; this.rList=Symbol[]; this.dList=Symbol[]
         this.fmula=""
         idf=readFixedFile("Penetration/Pen_fixed_effects.csv")
-        this.feff=FPen(df_data, idf)
+        this.feff=FPen(df_data, idf,cfg)
         idf=readRandFile("Penetration/Pen_random_effects.csv",cfg)
         this.reff=RPen(df_data, idf)
         this.hasBreaks = length(idf[1])==0 ? false : true
